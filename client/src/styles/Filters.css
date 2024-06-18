@@ -14,12 +14,14 @@
   }
   
   .filter-brace {
-    font-size: 24px;
+    font-size: 46px;
     font-weight: bold;
-    margin: 0 10px; /* Ensure equal spacing around the braces */
+    margin: 0 30px; /* Ensure equal spacing around the braces */
   }
   
   .filter-item {
+    filter: opacity(50%);
+    transition: ease-in-out 0.3s;
     display: inline-block;
     margin: 0 10px;
     font-size: 18px;
@@ -29,8 +31,8 @@
   }
   
   .filter-item:hover {
+    filter: none;
     color: #000;
-    text-decoration: underline;
   }
   
   .filters-line {

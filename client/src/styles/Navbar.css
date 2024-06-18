@@ -8,7 +8,7 @@
     border-bottom: 1px solid #ddd;
     background-color: #fff; /* Ensure a consistent background */
   }
-
+  
   .navbar-container {
     display: flex;
     justify-content: space-between; /* Space between brand and nav links */
@@ -29,10 +29,18 @@
   }
   
   .navbar-link {
+    filter: opacity(50%);
     font-size: 18px;
     text-decoration: none;
+    transition: ease-in-out 0.3s;
     color: #000;
   }
+
+  .navbar-links a:hover {
+    filter: none;
+  }
+  
+
   
   @media (max-width: 768px) {
     .navbar-links {

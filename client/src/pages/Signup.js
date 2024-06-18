@@ -36,7 +36,7 @@ const Signup = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
         <button className="sign-in-btn" onClick={handleSignUp}>Sign up</button>
-        <p className="sign-up">Already have an account? <a href="/login">Sign in</a></p>
+        <p className="sign-up">Already have an account? <a href="/account">Sign in</a></p>
         <p className="message">{message}</p>
       </div>
     </div>

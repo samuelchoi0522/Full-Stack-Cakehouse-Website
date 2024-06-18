@@ -28,7 +28,7 @@ const ForgotPassword = () => {
           onChange={(e) => setEmail(e.target.value)}
         />
         <button className="sign-in-btn" onClick={handleForgotPassword}>Send reset link</button>
-        <p className="sign-up">Remember your password? <a href="/login">Sign in</a></p>
+        <p className="sign-up">Remember your password? <a href="/account">Sign in</a></p>
         <p className="message">{message}</p>
       </div>
     </div>
