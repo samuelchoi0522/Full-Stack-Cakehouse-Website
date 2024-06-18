@@ -1,0 +1,58 @@
+/* src/styles/Gallery.css */
+
+body {
+    font-family: 'Playfair Display', serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .gallery-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .title {
+    font-size: 36px; 
+    font-weight: bold;
+    margin: 20px 0;
+    padding: 10px;
+  }
+  
+  .photo-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Uniform gap between items */
+    justify-content: center;
+    max-width: 960px; /* 3 * 300px (photo width) + 2 * 20px (gap) */
+  }
+  
+  .gallery-photo {
+    flex: 1 1 calc(33.333% - 20px); /* Adjusted width for three columns, accounting for gaps */
+    max-width: 300px;
+    height: 300px; /* Ensure the photo is square */
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  }
+  
+  .gallery-photo:hover {
+    transform: scale(1.05);
+  }
+  
+  @media (max-width: 768px) {
+    .gallery-photo {
+      flex: 1 1 calc(50% - 20px); /* Two columns on smaller screens */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .gallery-photo {
+      flex: 1 1 100%; /* One column on very small screens */
+    }
+  }
+  

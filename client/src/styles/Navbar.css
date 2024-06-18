@@ -1,0 +1,42 @@
+/* src/styles/Navbar.css */
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+    background-color: #fff; /* Ensure a consistent background */
+  }
+
+  .navbar-container {
+    display: flex;
+    justify-content: space-between; /* Space between brand and nav links */
+    align-items: center; /* Center items vertically */
+    max-width: 930px; /* Maximum width of the container */
+    margin: 0 auto; /* Center the container */
+    width: 100%;
+  }
+  
+  .navbar-brand {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .navbar-links {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .navbar-link {
+    font-size: 18px;
+    text-decoration: none;
+    color: #000;
+  }
+  
+  @media (max-width: 768px) {
+    .navbar-links {
+      display: none; /* Hide navbar links on smaller screens */
+    }
+  }
+  

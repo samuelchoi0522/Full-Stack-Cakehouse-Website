@@ -1,71 +1,32 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bodyParser = require('body-parser');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
+const orderRoute = require('./routes/order');
+const userRoute = require('./routes/user');
 
 const app = express();
-app.use(bodyParser.json());
+const PORT = process.env.PORT || 5000;
+
+// Middleware
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-const User = mongoose.model('User', new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-}));
-
-mongoose.connect('mongodb://localhost:27017/auth-demo', { useNewUrlParser: true, useUnifiedTopology: true });
-
-const transporter = nodemailer.createTransport({
-  service: 'Gmail',
-  auth: {
-    user: 'your-email@gmail.com',
-    pass: 'your-email-password',
-  },
+// Connect to MongoDB
+mongoose.connect('mongodb+srv://cluster38109.a3afcan.mongodb.net', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
-app.post('/register', async (req, res) => {
-  const { email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  try {
-    const user = await User.create({ email, password: hashedPassword });
-    res.status(201).send({ message: 'User created', user });
-  } catch (error) {
-    res.status(400).send({ error: 'User already exists' });
-  }
-});
+// Routes
+app.use('/api/order', orderRoute);
+app.use('/api/user', userRoute);
 
-app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(400).send({ error: 'Invalid email or password' });
-  }
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    return res.status(400).send({ error: 'Invalid email or password' });
-  }
-  const token = jwt.sign({ userId: user._id }, 'SECRET_KEY');
-  res.send({ token });
-});
+// Serve static files from the 'uploads' directory
+app.use('/uploads', express.static('uploads'));
 
-app.post('/forgot-password', async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(400).send({ error: 'User not found' });
-  }
-  const token = jwt.sign({ userId: user._id }, 'SECRET_KEY', { expiresIn: '1h' });
-  const resetLink = `http://localhost:3000/reset-password?token=${token}`;
-  await transporter.sendMail({
-    to: email,
-    subject: 'Password Reset',
-    html: `<p>Click <a href="${resetLink}">here</a> to reset your password</p>`,
-  });
-  res.send({ message: 'Password reset email sent' });
-});
-
-app.listen(3001, () => {
-  console.log('Server is running on port 3001');
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
