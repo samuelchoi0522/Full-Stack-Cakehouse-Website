@@ -1,0 +1,46 @@
+.order-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .order-container h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .order-container textarea,
+  .order-container input,
+  .order-container select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .order-container button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .order-container button:hover {
+    background-color: #45a049;
+  }
+  
+  .order-container p {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #333;
+  }
+  

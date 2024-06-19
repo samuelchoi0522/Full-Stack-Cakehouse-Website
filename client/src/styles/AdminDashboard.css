@@ -1,0 +1,24 @@
+.admin-dashboard {
+    padding: 20px;
+  }
+  
+  .admin-dashboard table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .admin-dashboard th, .admin-dashboard td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  .admin-dashboard th {
+    background-color: #f2f2f2;
+  }
+  
+  .order-photo {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+  }
+  

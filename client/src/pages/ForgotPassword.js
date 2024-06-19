@@ -7,11 +7,15 @@ const ForgotPassword = () => {
   const [message, setMessage] = useState('');
 
   const handleForgotPassword = async () => {
+    if (!email) {
+      setMessage('Please enter your email');
+      return;
+    }
     try {
       const response = await axios.post('http://localhost:3001/forgot-password', { email });
       setMessage('Password reset email sent');
     } catch (error) {
-      setMessage('Error sending password reset email');
+      setMessage(error.response?.data?.error || 'Error sending password reset email');
     }
   };
 
@@ -28,7 +32,7 @@ const ForgotPassword = () => {
           onChange={(e) => setEmail(e.target.value)}
         />
         <button className="sign-in-btn" onClick={handleForgotPassword}>Send reset link</button>
-        <p className="sign-up">Remember your password? <a href="/account">Sign in</a></p>
+        <p className="sign-up">Remember your password? <a href="/login">Sign in</a></p>
         <p className="message">{message}</p>
       </div>
     </div>

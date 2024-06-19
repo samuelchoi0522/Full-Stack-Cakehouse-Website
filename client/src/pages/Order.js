@@ -1,43 +1,102 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useAuth } from '../AuthContext';
+import { useNavigate } from 'react-router-dom';
+import '../styles/Order.css';
 
 const Order = () => {
-  const [file, setFile] = useState(null);
-  const [formData, setFormData] = useState({
-    type: '',
-    size: '',
-    flavor: '',
-    email: ''
-  });
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [orderDetails, setOrderDetails] = useState('');
+  const [orderType, setOrderType] = useState('Cake');
+  const [sizeOrQuantity, setSizeOrQuantity] = useState('');
+  const [photo, setPhoto] = useState(null);
+  const [message, setMessage] = useState('');
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleOrder = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setMessage('You must be logged in to place an order');
+        navigate('/login');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('orderDetails', orderDetails);
+      formData.append('orderType', orderType);
+      formData.append('sizeOrQuantity', sizeOrQuantity);
+      if (photo) {
+        formData.append('photo', photo);
+      }
+
+      console.log('Placing order with token:', token);
+
+      const response = await axios.post('http://localhost:3001/order', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Order response:', response.data);
+
+      setMessage('Order placed successfully');
+    } catch (error) {
+      console.error('Error placing order:', error.response);
+      setMessage(error.response?.data?.error || 'Error placing order');
+    }
   };
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const data = new FormData();
-    data.append('file', file);
-    data.append('type', formData.type);
-    data.append('size', formData.size);
-    data.append('flavor', formData.flavor);
-    data.append('email', formData.email);
-    await axios.post('/api/order', data);
-  };
+  if (!isAuthenticated) {
+    return <p>You must be logged in to place an order. <a href="/login">Login</a></p>;
+  }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="file" onChange={handleFileChange} />
-      <input type="text" name="type" value={formData.type} onChange={handleChange} placeholder="Cake or Cupcake" />
-      <input type="text" name="size" value={formData.size} onChange={handleChange} placeholder="Size" />
-      <input type="text" name="flavor" value={formData.flavor} onChange={handleChange} placeholder="Flavor" />
-      <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Your Email" />
-      <button type="submit">Submit</button>
-    </form>
+    <div className="order-container">
+      <h1>Place Your Order</h1>
+      <textarea
+        placeholder="Enter order details"
+        value={orderDetails}
+        onChange={(e) => setOrderDetails(e.target.value)}
+      ></textarea>
+      <div>
+        <label>Order Type:</label>
+        <select value={orderType} onChange={(e) => setOrderType(e.target.value)}>
+          <option value="Cake">Cake</option>
+          <option value="Cupcake">Cupcake</option>
+        </select>
+      </div>
+      <div>
+        {orderType === 'Cake' ? (
+          <>
+            <label>Cake Size:</label>
+            <input
+              type="text"
+              placeholder="Enter cake size"
+              value={sizeOrQuantity}
+              onChange={(e) => setSizeOrQuantity(e.target.value)}
+            />
+          </>
+        ) : (
+          <>
+            <label>Cupcake Quantity:</label>
+            <input
+              type="number"
+              placeholder="Enter cupcake quantity"
+              value={sizeOrQuantity}
+              onChange={(e) => setSizeOrQuantity(e.target.value)}
+            />
+          </>
+        )}
+      </div>
+      <div>
+        <label>Upload Photo:</label>
+        <input type="file" onChange={(e) => setPhoto(e.target.files[0])} />
+      </div>
+      <button onClick={handleOrder}>Place Order</button>
+      <p>{message}</p>
+    </div>
   );
 };
 

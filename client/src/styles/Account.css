@@ -1,71 +1,35 @@
-/* src/styles/Account.css */
-
-.account-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f5f5f5;
+.accountinfo-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   
-  .account-form {
-    background-color: #ffffff;
-    padding: 40px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  .accountinfo-container h1,
+  .accountinfo-container h2 {
     text-align: center;
-    width: 100%;
-    max-width: 400px;
-  }
-  
-  .brand {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-  
-  .slogan {
-    font-size: 18px;
-    margin-bottom: 30px;
-  }
-  
-  .input-field {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-  
-  .sign-in-btn {
-    width: 100%;
-    padding: 10px;
-    background-color: #000;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
     margin-bottom: 20px;
   }
   
-  .forgot-password {
-    color: #ff6347;
-    text-decoration: none;
+  .accountinfo-container p {
+    font-size: 16px;
+    margin: 10px 0;
   }
   
-  .sign-up {
-    font-size: 14px;
+  .accountinfo-container ul {
+    list-style-type: none;
+    padding: 0;
   }
   
-  .sign-up a {
-    color: #ff6347;
-    text-decoration: none;
+  .accountinfo-container li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
   }
   
-  .message {
-    color: red;
+  .accountinfo-container li img {
+    display: block;
     margin-top: 10px;
   }
   
