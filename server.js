@@ -288,32 +288,42 @@ app.post("/admin/login", async (req, res) => {
   }
 });
 
-// Normal user login endpoint
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
-      email,
-    ]);
-    const user = result.rows[0];
-    if (!user) {
-      return res.status(400).send({ error: "Invalid email or password" });
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+  
+    if (!email || !password) {
+      return res.status(400).send({ error: 'Email and password are required' });
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).send({ error: "Invalid email or password" });
+  
+    try {
+      const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+      const user = result.rows[0];
+  
+      if (!user) {
+        console.log('No user found with this email.');
+        return res.status(400).send({ error: 'Invalid email or password' });
+      }
+  
+      if (!user.email_confirmed) {
+        console.log('Email not confirmed for user:', email);
+        return res.status(400).send({ error: 'Please confirm your email before logging in' });
+      }
+  
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+  
+      if (!isPasswordValid) {
+        console.log('Invalid password for user:', email);
+        return res.status(400).send({ error: 'Invalid email or password' });
+      }
+  
+      const token = jwt.sign({ id: user.id, email: user.email, is_admin: user.is_admin }, SECRET_KEY);
+      res.send({ token });
+    } catch (error) {
+      console.error('Error logging in user:', error);
+      res.status(500).send({ error: 'Internal server error' });
     }
-    const token = jwt.sign(
-      { id: user.id, email: user.email, is_admin: user.is_admin },
-      SECRET_KEY
-    );
-    res.send({ token });
-  } catch (error) {
-    console.error("Error logging in user:", error);
-    res.status(500).send({ error: "Internal server error" });
-  }
-});
-
+  });
+  
 // Fetch all orders (admin only)
 app.get(
   "/admin/orders",
@@ -464,29 +474,65 @@ app.put(
 );
 
 // Register new user endpoint
-app.post("/register", async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+app.post('/register', async (req, res) => {
+    const { firstName, lastName, email, password } = req.body;
+  
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).send({ error: 'All fields are required' });
+    }
+  
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const result = await pool.query(
+        'INSERT INTO users (first_name, last_name, email, password, is_email_confirmed) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [firstName, lastName, email, hashedPassword, false]
+      );
+  
+      const user = result.rows[0];
+      const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
+      const confirmationLink = `http://localhost:3000/confirm-email?token=${token}`;
+  
+      await transporter.sendMail({
+        to: email,
+        subject: 'Email Confirmation',
+        html: `<p>Click <a href="${confirmationLink}">here</a> to confirm your email</p>`,
+      });
+  
+      res.status(201).send({ message: 'User registered successfully. Please confirm your email.' });
+    } catch (error) {
+      console.error('Error registering user:', error);
+      res.status(500).send({ error: 'Internal server error' });
+    }
+  });
+  
 
-  if (!firstName || !lastName || !email || !password) {
-    return res.status(400).send({ error: "All fields are required" });
-  }
-
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await pool.query(
-      "INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
-      [firstName, lastName, email, hashedPassword]
-    );
-
-    res
-      .status(201)
-      .send({ message: "User registered successfully", user: result.rows[0] });
-  } catch (error) {
-    console.error("Error registering user:", error);
-    res.status(500).send({ error: "Internal server error" });
-  }
-});
-
+  app.get('/confirm-email', async (req, res) => {
+    const token = req.query.token;
+  
+    if (!token) {
+      return res.status(400).send({ error: 'Invalid token' });
+    }
+  
+    try {
+      const decoded = jwt.verify(token, SECRET_KEY);
+      const userId = decoded.userId;
+  
+      const result = await pool.query(
+        'UPDATE users SET email_confirmed = $1 WHERE id = $2 RETURNING *',
+        [true, userId]
+      );
+  
+      if (result.rowCount === 0) {
+        return res.status(400).send({ error: 'User not found' });
+      }
+  
+      res.send({ message: 'Email confirmed, you may now log in' });
+    } catch (error) {
+      console.error('Error confirming email:', error);
+      res.status(500).send({ error: 'Internal server error' });
+    }
+  });
+  
 // Forgot password endpoint
 app.post("/forgot-password", async (req, res) => {
   const { email } = req.body;

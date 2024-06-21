@@ -15,6 +15,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import { AuthProvider } from './AuthContext';
 import './styles/App.css'; // Import global styles
 import AdminAuthProvider from './AdminAuthContext';
+import ConfirmEmail from './pages/ConfirmEmail';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/order-tracking" element={<OrderTracking />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/confirm-email" element={<ConfirmEmail />} />
             </Routes>
             </div>
         </div>
