@@ -1,33 +1,31 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import '../styles/Account.css';
+import React, { useState } from "react";
+import axios from "axios";
+import "../styles/Account.css";
 
 const Signup = () => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const navigate = useNavigate();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSignUp = async () => {
     if (password !== confirmPassword) {
-      setMessage('Passwords do not match');
+      setMessage("Passwords do not match");
       return;
     }
+
     try {
-      const response = await axios.post('http://localhost:3001/register', {
+      const response = await axios.post("http://localhost:3001/register", {
         firstName,
         lastName,
         email,
-        password
+        password,
       });
-      setMessage('Signup successful');
-      navigate('/login');
+      setMessage("Signup successful");
     } catch (error) {
-      setMessage(error.response?.data?.error || 'Error signing up');
+      setMessage("User already exists or another error occurred");
     }
   };
 
@@ -35,6 +33,7 @@ const Signup = () => {
     <div className="account-container">
       <div className="account-form">
         <h1 className="brand">Sweetplus Cakehouse</h1>
+        <p className="slogan">&nbsp;</p>
         <input
           type="text"
           placeholder="First Name"
@@ -70,8 +69,12 @@ const Signup = () => {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        <button className="sign-in-btn" onClick={handleSignUp}>Sign up</button>
-        <p className="sign-up">Already have an account? <a href="/login">Sign in</a></p>
+        <button className="sign-in-btn" onClick={handleSignUp}>
+          Sign up
+        </button>
+        <p className="sign-up">
+          Already have an account? <a href="/login">Sign in</a>
+        </p>
         <p className="message">{message}</p>
       </div>
     </div>

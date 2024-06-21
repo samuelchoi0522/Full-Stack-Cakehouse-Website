@@ -22,3 +22,15 @@
     object-fit: cover;
   }
   
+  /* AdminDashboard.css */
+
+.available-date {
+    background-color: green !important;
+    color: white;
+  }
+  
+  .unavailable-date {
+    background-color: red !important;
+    color: white;
+  }
+  
