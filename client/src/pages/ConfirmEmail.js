@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import '../styles/ConfirmEmail.css';
 
 const ConfirmEmail = () => {
   const [message, setMessage] = useState('');
@@ -23,10 +24,12 @@ const ConfirmEmail = () => {
 
   return (
     <div className="confirm-email-container">
-      <h1>{message}</h1>
-      {message === 'Email confirmed, you may now log in' && (
-        <button onClick={() => navigate('/login')}>Go to Login</button>
-      )}
+      <div className="confirm-email-content">
+        <h1>{message}</h1>
+        {message === 'Email confirmed, you may now log in' && (
+          <button onClick={() => navigate('/login')} className="login-btn">Go to Login</button>
+        )}
+      </div>
     </div>
   );
 };

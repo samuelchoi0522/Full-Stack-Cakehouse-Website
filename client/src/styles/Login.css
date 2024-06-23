@@ -1,49 +1,68 @@
-/* src/styles/Account.css */
-
-.account-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+.login-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
   }
   
-  .account-form {
-    background-color: #ffffff;
-    padding: 40px;
+  .login-header {
+    font-size: 32px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .login-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  
+  .login-form,
+  .new-customer {
+    flex: 1;
+    background-color: #ffffff76;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 100%;
-    max-width: 400px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
   }
   
-  .brand {
-    font-size: 24px;
-    font-weight: bold;
+  .new-customer {
+    background-color: #ffffff76;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .new-customer h3 {
     margin-bottom: 10px;
-    text-decoration: none;
-    color: black;
+    text-align: center;
   }
   
-  .slogan {
-    font-size: 18px;
-    margin-bottom: 30px;
+  .new-customer ul {
+    padding-left: 20px;
+    margin-bottom: 20px;
+    text-align: left;
   }
   
   .input-field {
-    width: 100%;
+    width: 100%; /* Changed this to 100% */
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
+    box-sizing: border-box; /* Added this to ensure padding doesn't overflow */
   }
   
   .sign-in-btn {
     width: 100%;
     padding: 10px;
-    background-color: #000;
-    color: #fff;
+    background-color: #d0021b;
+    color: white;
     border: none;
     border-radius: 4px;
     font-size: 16px;
@@ -52,21 +71,27 @@
   }
   
   .forgot-password {
-    color: #ff6347;
-    text-decoration: none;
-  }
-  
-  .sign-up {
-    font-size: 14px;
-  }
-  
-  .sign-up a {
-    color: #ff6347;
-    text-decoration: none;
-  }
-  
-  .message {
-    color: red;
+    display: block;
     margin-top: 10px;
+    color: #d0021b;
+    text-decoration: none;
+  }
+  
+  .create-account-btn {
+    display: block;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #d0021b;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: -10px; /* Added this to prevent the layout from shifting */
   }
   

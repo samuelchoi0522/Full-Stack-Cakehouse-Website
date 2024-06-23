@@ -407,6 +407,10 @@ const AdminDashboard = () => {
                   <strong>Pickup Option:</strong> {order.pickup_option}
                 </p>
                 <p>
+                  <strong>Delivery Address:</strong>{" "}
+                  {order.delivery_address}
+                </p>
+                <p>
                   <strong>Dietary Restrictions:</strong>{" "}
                   {order.dietary_restrictions}
                 </p>

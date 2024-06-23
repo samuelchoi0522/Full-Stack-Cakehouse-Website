@@ -16,6 +16,9 @@ import { AuthProvider } from './AuthContext';
 import './styles/App.css'; // Import global styles
 import AdminAuthProvider from './AdminAuthContext';
 import ConfirmEmail from './pages/ConfirmEmail';
+import ResetPassword from './pages/ResetPassword';
+import OrderSuccess from './pages/OrderSuccess';
+import VerifyEmail from './pages/VerifyEmail';
 
 function App() {
   return (
@@ -38,6 +41,9 @@ function App() {
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/confirm-email" element={<ConfirmEmail />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                <Route path="/order-success" element={<OrderSuccess />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
             </Routes>
             </div>
         </div>

@@ -1,0 +1,49 @@
+.order-success-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+  }
+  
+  .order-success-content {
+    width: 100%;
+    max-width: 500px;
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .checkmark {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+  }
+  
+  .order-success-content h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .order-success-content p {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .view-order-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #d0021b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .view-order-button:hover {
+    background-color: #a00116;
+  }
+  

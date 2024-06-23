@@ -60,16 +60,7 @@ const Account = () => {
 
   return (
     <div className="accountinfo-container">
-      <h1>Account Information</h1>
-      <p>
-        <strong>First Name:</strong> {user.firstName}
-      </p>
-      <p>
-        <strong>Last Name:</strong> {user.lastName}
-      </p>
-      <p>
-        <strong>Email:</strong> {user.email}
-      </p>
+      <h1>Hey, {user.firstName}!</h1>
 
       <h2>Your Orders</h2>
       {orders.length === 0 ? (
@@ -77,84 +68,42 @@ const Account = () => {
       ) : (
         <ul>
           {orders.map((order) => (
-            <li key={order.id}>
-              <p>
-                <strong>Order Number:</strong> {order.order_number}
-              </p>
-              <p>
-                <strong>Order Type:</strong> {order.order_type}
-              </p>
-              {order.order_type === "Cupcake" ? (
-                <>
-                  <p>
-                    <strong>Cupcake Count:</strong> {order.cupcake_count}
-                  </p>
-                  <p>
-                    <strong>Cupcake Flavor:</strong> {order.cupcake_flavor}
-                  </p>
-                  <p>
-                    <strong>Frosting Flavor:</strong> {order.frosting_flavor}
-                  </p>
-                  <p>
-                    <strong>Fruit Toppings:</strong> {order.fruit_toppings}
-                  </p>
-                  <p>
-                    <strong>Flower Decoration:</strong>{" "}
-                    {order.flower_decoration}
-                  </p>
-                  <p>
-                    <strong>Cupcake Design:</strong> {order.cupcake_design}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p>
-                    <strong>Cake Size:</strong> {order.cake_size}
-                  </p>
-                  <p>
-                    <strong>Cake Flavor:</strong> {order.cake_flavor}
-                  </p>
-                  <p>
-                    <strong>Cake Filling:</strong> {order.cake_filling}
-                  </p>
-                  <p>
-                    <strong>Cake Decoration:</strong> {order.cake_decoration}
-                  </p>
-                  <p>
-                    <strong>Cake Design:</strong> {order.cake_design}
-                  </p>
-                </>
-              )}
-              <p>
-                <strong>Pickup Date:</strong>{" "}
-                {new Date(order.pickup_date).toLocaleDateString()}
-              </p>
-              <p>
-                <strong>Pickup Option:</strong> {order.pickup_option}
-              </p>
-              <p>
-                <strong>Dietary Restrictions:</strong>{" "}
-                {order.dietary_restrictions}
-              </p>
-              <p>
-                <strong>Order Status:</strong> {order.status}
-              </p>
-              <p>
-                <strong>Payment Status:</strong> {order.payment_status}
-              </p>
-              <p>
-                <strong>Total Cost:</strong> ${order.total_cost}
-              </p>
-              <p>
-                <strong>Fulfillment Status:</strong> {order.fulfillment_status}
-              </p>
-              {order.photo_path && (
-                <img
-                  src={`http://localhost:3001/${order.photo_path}`}
-                  alt="Order"
-                  style={{ width: "100px" }}
-                />
-              )}
+            <li key={order.id} className="order-item">
+              <div className="order-header">
+                <div>
+                  <p><strong>Order Placed:</strong> {new Date(order.created_at).toLocaleDateString()}</p>
+                  <p><strong>Total:</strong> {order.total_cost ? `$${order.total_cost}` : 'Pending'}</p>
+                  <p><strong>Pickup Date:</strong> {new Date(order.pickup_date).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p><strong>Order Number:</strong> {order.order_number}</p>
+                  <p><strong>Pickup Option:</strong> {order.pickup_option}</p>
+                  {order.pickup_option === "Delivery" && (
+                    <p><strong>Delivery Address:</strong> {order.delivery_address}</p>
+                  )}
+                </div>
+              </div>
+              <div className="order-details">
+                <p><strong>Order Type:</strong> {order.order_type}</p>
+                {order.order_type === "Cupcake" ? (
+                  <>
+                    <p><strong>Cupcake Count:</strong> {order.cupcake_count}</p>
+                    <p><strong>Cupcake Flavor:</strong> {order.cupcake_flavor}</p>
+                    <p><strong>Frosting Flavor:</strong> {order.frosting_flavor}</p>
+                    <p><strong>Fruit Toppings:</strong> {order.fruit_toppings}</p>
+                    <p><strong>Flower Decoration:</strong> {order.flower_decoration}</p>
+                  </>
+                ) : (
+                  <>
+                    <p><strong>Cake Size:</strong> {order.cake_size}</p>
+                    <p><strong>Cake Flavor:</strong> {order.cake_flavor}</p>
+                    <p><strong>Cake Filling:</strong> {order.cake_filling}</p>
+                    <p><strong>Cake Decoration:</strong> {order.cake_decoration}</p>
+                  </>
+                )}
+                <p><strong>Dietary Restrictions:</strong> {order.dietary_restrictions}</p>
+                <p><strong>Fulfillment Status:</strong> {order.fulfillment_status}</p>
+              </div>
             </li>
           ))}
         </ul>

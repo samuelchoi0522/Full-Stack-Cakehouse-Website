@@ -1,39 +1,57 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import '../styles/Account.css';
+import React, { useState } from "react";
+import axios from "axios";
+import "../styles/ForgotPassword.css";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleForgotPassword = async () => {
     if (!email) {
-      setMessage('Please enter your email');
+      setMessage("Please enter your email");
       return;
     }
     try {
-      const response = await axios.post('http://localhost:3001/forgot-password', { email });
-      setMessage('Password reset email sent');
+      const response = await axios.post(
+        "http://localhost:3001/forgot-password",
+        { email }
+      );
+      setMessage("Password reset email sent");
     } catch (error) {
-      setMessage(error.response?.data?.error || 'Error sending password reset email');
+      setMessage(
+        error.response?.data?.error || "Error sending password reset email"
+      );
     }
   };
 
   return (
-    <div className="account-container">
-      <div className="account-form">
-        <h1 className="brand">Sweetplus Cakehouse</h1>
-        <p className="slogan">Reset your password</p>
-        <input
-          type="email"
-          placeholder="E-mail address"
-          className="input-field"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <button className="sign-in-btn" onClick={handleForgotPassword}>Send reset link</button>
-        <p className="sign-up">Remember your password? <a href="/login">Sign in</a></p>
-        <p className="message">{message}</p>
+    <div className="forgot-password-page">
+      <div className="content">
+        <div className="forgot-password-container">
+          <h1 className="forgot-password-header">Forgot Your Password?</h1>
+          <p className="forgot-password-description">
+            Fill in your email below to request a new password. An email will be
+            sent to the address below containing a link to verify your email
+            address.
+          </p>
+          <div className="forgot-password-form">
+            <label>Email Address:</label>
+            <input
+              type="email"
+              placeholder="Email Address"
+              className="input-field"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button
+              className="reset-password-btn"
+              onClick={handleForgotPassword}
+            >
+              Reset Password
+            </button>
+            <p className="message">{message}</p>
+          </div>
+        </div>
       </div>
     </div>
   );

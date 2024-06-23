@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/Order.css";
 import { useAuth } from "../AuthContext";
+import { useNavigate } from "react-router-dom";
+import { LoadScript, Autocomplete } from "@react-google-maps/api";
+
+const libraries = ["places"];
 
 const Order = () => {
   const { isAuthenticated } = useAuth();
@@ -27,6 +31,9 @@ const Order = () => {
   const [blockedDates, setBlockedDates] = useState([]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [delivery_address, setDeliveryAddress] = useState("");  // Add state for delivery address
+  const autocompleteRef = useRef(null);
+  const navigate = useNavigate();  // Initialize useNavigate
 
   useEffect(() => {
     const fetchBlockedDates = async () => {
@@ -40,11 +47,16 @@ const Order = () => {
 
     fetchBlockedDates();
   }, []);
-  
 
-  
+  const handlePlaceChanged = () => {
+    const place = autocompleteRef.current.getPlace();
+    if (place) {
+      setDeliveryAddress(place.formatted_address);
+    }
+  };
 
-  const handleOrderSubmit = async (e) => {
+// Inside your Order.js
+const handleOrderSubmit = async (e) => {
     e.preventDefault();
   
     if (!isAuthenticated) {
@@ -74,25 +86,35 @@ const Order = () => {
     formData.append("pickupOption", pickupOption);
     formData.append("dietaryRestrictions", dietaryRestrictions);
     formData.append("photo", photo);
+    formData.append("delivery_address", delivery_address); // Ensure correct column name
   
     try {
-        const token = localStorage.getItem('token');
-        const response = await axios.post('http://localhost:3001/order', formData, {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        "http://localhost:3001/order",
+        formData,
+        {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
-        });
-        setMessage('Order placed successfully');
-      } catch (err) {
-        console.error('Error placing order:', err);
-        setError('Error placing order');
-      }
+        }
+      );
+      setMessage("Order placed successfully");
+      navigate("/order-success");  // Redirect to success page
+    } catch (err) {
+      console.error("Error placing order:", err);
+      setError("Error placing order");
+    }
   };
   
 
   const isBlockedDate = (date) => {
-    return blockedDates.some(
+    const today = new Date();
+    const twoDaysFromToday = new Date(today);
+    twoDaysFromToday.setDate(today.getDate() + 2);
+    
+    return date < today || date <= twoDaysFromToday || blockedDates.some(
       (blockedDate) =>
         new Date(blockedDate).toDateString() === date.toDateString()
     );
@@ -166,30 +188,77 @@ const Order = () => {
               </option>
             </select>
 
-            <label>
-              Fruit Toppings:
-              <select
-                multiple
-                value={fruitToppings} // If you are using multiple selection
-                onChange={(e) =>
-                  setFruitToppings(
-                    Array.from(
-                      e.target.selectedOptions,
-                      (option) => option.value
-                    )
-                  )
-                }
-              >
-                <option value="Strawberry">
-                  Strawberry + 0.83¢ per cupcake
-                </option>
-                <option value="Blueberry">Blueberry + 0.83¢ per cupcake</option>
-                <option value="Raspberry">Raspberry + 0.83¢ per cupcake</option>
-                <option value="Blackberry">
-                  Blackberry + 0.83¢ per cupcake
-                </option>
-              </select>
-            </label>
+            <label>Fruit Toppings:</label>
+            <div className="fruit-toppings">
+              <label>
+                <input
+                  type="checkbox"
+                  value="Strawberry"
+                  checked={fruitToppings.includes("Strawberry")}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setFruitToppings([...fruitToppings, e.target.value]);
+                    } else {
+                      setFruitToppings(
+                        fruitToppings.filter((item) => item !== e.target.value)
+                      );
+                    }
+                  }}
+                />
+                Strawberry + 0.83¢ per cupcake
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  value="Blueberry"
+                  checked={fruitToppings.includes("Blueberry")}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setFruitToppings([...fruitToppings, e.target.value]);
+                    } else {
+                      setFruitToppings(
+                        fruitToppings.filter((item) => item !== e.target.value)
+                      );
+                    }
+                  }}
+                />
+                Blueberry + 0.83¢ per cupcake
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  value="Raspberry"
+                  checked={fruitToppings.includes("Raspberry")}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setFruitToppings([...fruitToppings, e.target.value]);
+                    } else {
+                      setFruitToppings(
+                        fruitToppings.filter((item) => item !== e.target.value)
+                      );
+                    }
+                  }}
+                />
+                Raspberry + 0.83¢ per cupcake
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  value="Blackberry"
+                  checked={fruitToppings.includes("Blackberry")}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setFruitToppings([...fruitToppings, e.target.value]);
+                    } else {
+                      setFruitToppings(
+                        fruitToppings.filter((item) => item !== e.target.value)
+                      );
+                    }
+                  }}
+                />
+                Blackberry + 0.83¢ per cupcake
+              </label>
+            </div>
 
             <label>Flower Decoration:</label>
             <select
@@ -265,7 +334,7 @@ const Order = () => {
 
             <label>
               Cake Decoration:
-              <div>
+              <div className="cake-decoration">
                 <label>
                   <input
                     type="checkbox"
@@ -353,50 +422,63 @@ const Order = () => {
           </>
         )}
 
-        <label>Date Needed:</label>
-        <DatePicker
-          selected={pickupDate}
-          onChange={(date) => setPickupDate(date)}
-          filterDate={(date) => !isBlockedDate(date)}
-        />
+        {orderType && (
+          <>
+            <label>Date Needed:</label>
+            <DatePicker
+              selected={pickupDate}
+              onChange={(date) => setPickupDate(date)}
+              filterDate={(date) => !isBlockedDate(date)}
+            />
+            <br></br>
+            <label>Pickup Option:</label>
+            <select
+              value={pickupOption}
+              onChange={(e) => setPickupOption(e.target.value)}
+              required
+            >
+              <option value="">Select...</option>
+              <option value="Pickup">I would like to pick up for myself</option>
+              <option value="Delivery">
+                I would like to have my order delivered ($15 in Prosper + $1 per
+                mile from Prosper)
+              </option>
+            </select>
 
-        <label>Pickup Option:</label>
-        <select
-          value={pickupOption}
-          onChange={(e) => setPickupOption(e.target.value)}
-          required
-        >
-          <option value="">Select...</option>
-          <option value="Pickup">I would like to pick up for myself</option>
-          <option value="Delivery">
-            I would like to have my order delivered ($15 in Prosper + $1 per
-            mile from Prosper)
-          </option>
-        </select>
+            {pickupOption === "Delivery" && (
+                <LoadScript googleMapsApiKey="AIzaSyBX9C0ALb0wxEnuikmQCoQ2JucYfqQgNhA" libraries={libraries}>
+                <Autocomplete
+                  onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+                  onPlaceChanged={handlePlaceChanged}
+                >
+                  <input
+                    type="text"
+                    placeholder="Enter delivery address"
+                    className="input-field"
+                    value={delivery_address}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    required
+                  />
+                </Autocomplete>
+              </LoadScript>
+            )}
 
-        <label>Dietary Restrictions or Allergies:</label>
-        <textarea
-          value={dietaryRestrictions}
-          onChange={(e) => setDietaryRestrictions(e.target.value)}
-        ></textarea>
-
-        <label>Upload Photo:</label>
-        <input
-          type="file"
-          onChange={(e) => setPhoto(e.target.files[0])}
-          required
-        />
-
-        <label>
-          <input
-            type="checkbox"
-            checked={agreedToPolicies}
-            onChange={(e) => setAgreedToPolicies(e.target.checked)}
-            required
-          />
-          I read/agree above "Important Information: Cake Flavor and Texture
-          Policies"
-        </label>
+            <label>Dietary Restrictions or Allergies:</label>
+            <textarea
+              value={dietaryRestrictions}
+              onChange={(e) => setDietaryRestrictions(e.target.value)}
+            ></textarea>
+            <div className="photo-container">
+              <label>Upload Photo:</label>
+              <input
+                type="file"
+                onChange={(e) => setPhoto(e.target.files[0])}
+                accept=".png,.jpeg"
+                required
+              />
+            </div>
+          </>
+        )}
 
         <button type="submit">Submit Order</button>
       </form>

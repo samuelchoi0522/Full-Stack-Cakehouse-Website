@@ -9,7 +9,8 @@ const Login = () => {
   const [message, setMessage] = useState('');
   const { login } = useAuth();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
       const response = await axios.post('http://localhost:3001/login', { email, password });
       login(response.data.token);
@@ -19,28 +20,36 @@ const Login = () => {
   };
 
   return (
-    <div className="account-container">
-      <div className="account-form">
-        <h1 className="brand">Sweetplus Cakehouse</h1>
-        <p className="slogan">&nbsp;</p>
-        <input
-          type="email"
-          placeholder="E-mail address or phone number"
-          className="input-field"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="input-field"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button className="sign-in-btn" onClick={handleLogin}>Sign in</button>
-        <a href="/forgot-password" className="forgot-password">Forgot password?</a>
-        <p className="sign-up">Not a member yet? <a href="/signup">Sign up</a></p>
-        <p className="message">{message}</p>
+    <div className="login-page">
+      <h2 className="login-header">Sign in</h2>
+      <div className="login-container">
+        <div className="login-form">
+          <form onSubmit={handleLogin}>
+            <label>Email Address:</label>
+            <input
+              type="email"
+              placeholder="Email address"
+              className="input-field"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <label>Password:</label>
+            <input
+              type="password"
+              placeholder="Password"
+              className="input-field"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button type="submit" className="sign-in-btn">Sign in</button>
+            {message && <p className="error-message">Incorrect Email or Password</p>}
+            <a href="/forgot-password" className="forgot-password">Forgot your password?</a>
+          </form>
+        </div>
+        <div className="new-customer">
+          <h3>New Customer?</h3>
+          <a href="/signup" className="create-account-btn">Create Account</a>
+        </div>
       </div>
     </div>
   );

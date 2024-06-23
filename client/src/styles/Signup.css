@@ -1,0 +1,88 @@
+/* src/styles/Signup.css */
+
+body, html {
+    height: 100%;
+    margin: 0;
+  }
+  
+  .signup-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 65vh;
+  }
+
+  .content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+  }
+  
+  .signup-container {
+    width: 100%;
+    max-width: 500px;
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .signup-header {
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+  
+  .signup-description {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .signup-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .signup-form label {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  
+  .input-field {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  
+  .signup-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #d0021b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .sign-in {
+    font-size: 14px;
+  }
+  
+  .sign-in a {
+    color: #d0021b;
+    text-decoration: none;
+  }
+  
+  .message {
+    color: red;
+    margin-top: 10px;
+  }
+  
