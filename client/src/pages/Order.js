@@ -7,7 +7,9 @@ import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
 import { LoadScript, Autocomplete } from "@react-google-maps/api";
 
+
 const libraries = ["places"];
+const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
 const Order = () => {
   const { isAuthenticated } = useAuth();
@@ -446,7 +448,8 @@ const handleOrderSubmit = async (e) => {
             </select>
 
             {pickupOption === "Delivery" && (
-                <LoadScript googleMapsApiKey="AIzaSyBX9C0ALb0wxEnuikmQCoQ2JucYfqQgNhA" libraries={libraries}>
+                <LoadScript googleMapsApiKey={GOOGLE_API_KEY} libraries={libraries}>
+
                 <Autocomplete
                   onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
                   onPlaceChanged={handlePlaceChanged}

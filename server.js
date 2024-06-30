@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
@@ -14,6 +15,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const SECRET_KEY = "your_secret_key"; // You should store this in environment variables
+
+const GOOGLE_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",

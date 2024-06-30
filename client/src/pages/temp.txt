@@ -1,0 +1,110 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { useAuth } from '../AuthContext';
+import '../styles/Order.css';
+
+const Order = () => {
+  const { isAuthenticated } = useAuth();
+  const [orderDetails, setOrderDetails] = useState('');
+  const [orderType, setOrderType] = useState('');
+  const [sizeOrQuantity, setSizeOrQuantity] = useState('');
+  const [photo, setPhoto] = useState(null);
+  const [dateNeeded, setDateNeeded] = useState(null);
+  const [blockedDates, setBlockedDates] = useState([]);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    // Fetch blocked dates from the server
+    const fetchBlockedDates = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/blocked-dates');
+        setBlockedDates(response.data);
+      } catch (err) {
+        console.error('Error fetching blocked dates:', err);
+      }
+    };
+
+    fetchBlockedDates();
+  }, []);
+
+  const handleOrderSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      setError('Please log in to place an order.');
+      return;
+    }
+
+    if (!orderDetails || !orderType || !sizeOrQuantity || !dateNeeded) {
+      setError('All fields are required.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('orderDetails', orderDetails);
+    formData.append('orderType', orderType);
+    formData.append('sizeOrQuantity', sizeOrQuantity);
+    formData.append('photo', photo);
+    formData.append('dateNeeded', dateNeeded);
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post('http://localhost:3001/order', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setMessage('Order placed successfully');
+    } catch (err) {
+      console.error('Error placing order:', err);
+      setError('Error placing order');
+    }
+  };
+
+  const isBlockedDate = (date) => {
+    return blockedDates.some(
+      (blockedDate) => new Date(blockedDate).toDateString() === date.toDateString()
+    );
+  };
+
+  return (
+    <div className="order-container">
+      <h1>Place an Order</h1>
+      {error && <p className="error">{error}</p>}
+      {message && <p className="message">{message}</p>}
+      <form onSubmit={handleOrderSubmit}>
+        <label>
+          Order Details:
+          <textarea value={orderDetails} onChange={(e) => setOrderDetails(e.target.value)} />
+        </label>
+        <label>
+          Order Type:
+          <input type="text" value={orderType} onChange={(e) => setOrderType(e.target.value)} />
+        </label>
+        <label>
+          Size or Quantity:
+          <input type="text" value={sizeOrQuantity} onChange={(e) => setSizeOrQuantity(e.target.value)} />
+        </label>
+        <label>
+          Photo:
+          <input type="file" onChange={(e) => setPhoto(e.target.files[0])} />
+        </label>
+        <label>
+          Date Needed:
+          <DatePicker
+            selected={dateNeeded}
+            onChange={(date) => setDateNeeded(date)}
+            filterDate={(date) => !isBlockedDate(date)}
+          />
+        </label>
+        <button type="submit">Place Order</button>
+      </form>
+    </div>
+  );
+};
+
+export default Order;
