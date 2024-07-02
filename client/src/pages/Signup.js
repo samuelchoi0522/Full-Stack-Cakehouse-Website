@@ -12,7 +12,34 @@ const Signup = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
+  const validatePassword = (password) => {
+    const minLength = /.{8,}/;
+    const uppercase = /[A-Z]/;
+    const lowercase = /[a-z]/;
+    const specialChar = /[!@#$%^&*(),.?":{}|<>]/;
+
+    if (!minLength.test(password)) {
+      return "Password must be at least 8 characters long.";
+    }
+    if (!uppercase.test(password)) {
+      return "Password must contain at least one uppercase letter.";
+    }
+    if (!lowercase.test(password)) {
+      return "Password must contain at least one lowercase letter.";
+    }
+    if (!specialChar.test(password)) {
+      return "Password must contain at least one special character.";
+    }
+    return null;
+  };
+
   const handleSignUp = async () => {
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setMessage(passwordError);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setMessage("Passwords do not match");
       return;
@@ -37,9 +64,6 @@ const Signup = () => {
       <div className="content">
         <div className="signup-container">
           <h1 className="signup-header">Sign Up</h1>
-          <p className="signup-description">
-            Create an account with us to enjoy a personalized experience.
-          </p>
           <div className="signup-form">
             <label>First Name:</label>
             <input

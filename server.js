@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
@@ -87,12 +87,90 @@ const generateOrderNumber = async () => {
   return orderNumber;
 };
 
-app.post(
-    "/order",
-    authenticateToken,
-    upload.single("photo"),
-    async (req, res) => {
-      const {
+app.post("/order", upload.single("photo"), async (req, res) => {
+  const {
+    orderType,
+    cupcakeCount,
+    cupcakeFlavor,
+    frostingFlavor,
+    fruitToppings,
+    flowerDecoration,
+    cupcakeDesign,
+    cakeSize,
+    cakeFlavor,
+    cakeFilling,
+    cakeDecoration,
+    cakeDesign,
+    pickupDate,
+    pickupOption,
+    dietaryRestrictions,
+    delivery_address,
+    guestFirstName,
+    guestLastName,
+    guestEmail,
+  } = req.body;
+
+  const photoPath = req.file ? req.file.path : null;
+
+  let userId = null;
+  let isGuest = false;
+
+  // Check if the request has an Authorization header
+  const authHeader = req.headers["authorization"];
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    if (token) {
+      try {
+        const user = jwt.verify(token, SECRET_KEY);
+        userId = user.id;
+      } catch (err) {
+        return res.status(403).send({ error: "Token is not valid" });
+      }
+    }
+  }
+
+  // If no user ID is set, this is a guest order
+  if (!userId) {
+    isGuest = true;
+    if (!guestFirstName || !guestLastName || !guestEmail) {
+      return res.status(400).send({ error: "Guest information is required" });
+    }
+  }
+
+  const orderDetails = `
+      Order Type: ${orderType}
+      ${
+        orderType === "Cake"
+          ? `
+      Cake Size: ${cakeSize}
+      Cake Flavor: ${cakeFlavor}
+      Cake Filling: ${cakeFilling}
+      Cake Decoration: ${cakeDecoration}
+      Cake Design: ${cakeDesign}
+      `
+          : `
+      Cupcake Count: ${cupcakeCount}
+      Cupcake Flavor: ${cupcakeFlavor}
+      Frosting Flavor: ${frostingFlavor}
+      Fruit Toppings: ${fruitToppings}
+      Flower Decoration: ${flowerDecoration}
+      Cupcake Design: ${cupcakeDesign}
+      `
+      }
+      Pickup Date: ${pickupDate}
+      Pickup Option: ${pickupOption}
+      Dietary Restrictions: ${dietaryRestrictions}
+      Delivery Address: ${delivery_address}
+    `;
+
+  try {
+    const orderNumber = await generateOrderNumber();
+
+    const result = await pool.query(
+      "INSERT INTO orders (user_id, order_details, order_type, cupcake_count, cupcake_flavor, frosting_flavor, fruit_toppings, flower_decoration, cupcake_design, cake_size, cake_flavor, cake_filling, cake_decoration, cake_design, pickup_date, pickup_option, dietary_restrictions, delivery_address, photo_path, order_number, guest_first_name, guest_last_name, guest_email) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23) RETURNING *",
+      [
+        userId,
+        orderDetails,
         orderType,
         cupcakeCount,
         cupcakeFlavor,
@@ -105,95 +183,46 @@ app.post(
         cakeFilling,
         cakeDecoration,
         cakeDesign,
-        pickupDate,
+        new Date(pickupDate),
         pickupOption,
         dietaryRestrictions,
         delivery_address,
-      } = req.body;
-  
-      const photoPath = req.file ? req.file.path : null;
-  
-      const orderDetails = `
-        Order Type: ${orderType}
-        ${orderType === "Cake" ? `
-        Cake Size: ${cakeSize}
-        Cake Flavor: ${cakeFlavor}
-        Cake Filling: ${cakeFilling}
-        Cake Decoration: ${cakeDecoration}
-        Cake Design: ${cakeDesign}
-        ` : `
-        Cupcake Count: ${cupcakeCount}
-        Cupcake Flavor: ${cupcakeFlavor}
-        Frosting Flavor: ${frostingFlavor}
-        Fruit Toppings: ${fruitToppings}
-        Flower Decoration: ${flowerDecoration}
-        Cupcake Design: ${cupcakeDesign}
-        `}
-        Pickup Date: ${pickupDate}
-        Pickup Option: ${pickupOption}
-        Dietary Restrictions: ${dietaryRestrictions}
-        Delivery Address: ${delivery_address}
-      `;
-  
-      try {
-        const orderNumber = await generateOrderNumber();
-  
-        const result = await pool.query(
-          "INSERT INTO orders (user_id, order_details, order_type, cupcake_count, cupcake_flavor, frosting_flavor, fruit_toppings, flower_decoration, cupcake_design, cake_size, cake_flavor, cake_filling, cake_decoration, cake_design, pickup_date, pickup_option, dietary_restrictions, delivery_address, photo_path, order_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) RETURNING *",
-          [
-            req.user.id,
-            orderDetails,
-            orderType,
-            cupcakeCount,
-            cupcakeFlavor,
-            frostingFlavor,
-            fruitToppings,
-            flowerDecoration,
-            cupcakeDesign,
-            cakeSize,
-            cakeFlavor,
-            cakeFilling,
-            cakeDecoration,
-            cakeDesign,
-            new Date(pickupDate),
-            pickupOption,
-            dietaryRestrictions,
-            delivery_address,
-            photoPath,
-            orderNumber,
-          ]
-        );
+        photoPath,
+        orderNumber,
+        isGuest ? guestFirstName : null,
+        isGuest ? guestLastName : null,
+        isGuest ? guestEmail : null,
+      ]
+    );
 
-        console.log("Incoming order data:", {
-            user_id: req.user.id,
-            orderType,
-            cupcakeCount,
-            cupcakeFlavor,
-            frostingFlavor,
-            fruitToppings,
-            flowerDecoration,
-            cupcakeDesign,
-            cakeSize,
-            cakeFlavor,
-            cakeFilling,
-            cakeDecoration,
-            cakeDesign,
-            pickupDate,
-            pickupOption,
-            dietaryRestrictions,
-            delivery_address,
-            photoPath,
-            orderDetails, // Add orderDetails to the log
-          });
-  
-        res.status(201).send({ message: "Order created", order: result.rows[0] });
-      } catch (error) {
-        console.error("Error creating order:", error);
-        res.status(500).send({ error: "Internal server error" });
-      }
-    }
-  );
-  
+    console.log("Incoming order data:", {
+      user_id: userId,
+      orderType,
+      cupcakeCount,
+      cupcakeFlavor,
+      frostingFlavor,
+      fruitToppings,
+      flowerDecoration,
+      cupcakeDesign,
+      cakeSize,
+      cakeFlavor,
+      cakeFilling,
+      cakeDecoration,
+      cakeDesign,
+      pickupDate,
+      pickupOption,
+      dietaryRestrictions,
+      delivery_address,
+      photoPath,
+      orderDetails, // Add orderDetails to the log
+    });
+
+    res.status(201).send({ message: "Order created", order: result.rows[0] });
+  } catch (error) {
+    console.error("Error creating order:", error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
 
 // Fetch user information endpoint
 app.get("/user", authenticateToken, async (req, res) => {
@@ -336,11 +365,14 @@ app.get(
   async (req, res) => {
     try {
       const result = await pool.query(`
-        SELECT orders.*, users.first_name, users.last_name, users.email 
-        FROM orders 
-        JOIN users ON orders.user_id = users.id
-        ORDER BY created_at DESC
-      `);
+          SELECT orders.*, 
+          COALESCE(users.first_name, orders.guest_first_name) AS first_name, 
+          COALESCE(users.last_name, orders.guest_last_name) AS last_name, 
+          COALESCE(users.email, orders.guest_email) AS email
+          FROM orders 
+          LEFT JOIN users ON orders.user_id = users.id
+          ORDER BY created_at DESC
+        `);
 
       res.send(result.rows);
     } catch (error) {
@@ -371,8 +403,11 @@ app.put(
         order.user_id,
       ]);
       const user = userResult.rows[0];
-      if (!user) {
-        return res.status(404).send({ error: "User not found" });
+
+      const guestEmail = order.guest_email;
+      const email = user ? user.email : guestEmail;
+      if (!email) {
+        return res.status(404).send({ error: "User or guest email not found" });
       }
 
       const updatedOrder = await pool.query(
@@ -386,16 +421,33 @@ app.put(
       );
 
       const emailMessage = `
-        <p>Order Type: ${order.order_type}</p>
-        <p>Size/Quantity: ${order.size_or_quantity}</p>
-        ${totalCost ? `<p>Total Cost: $${totalCost}</p>` : ""}
-        <p>Payment Status: ${paymentStatus}</p>
-        <p>Fulfillment Status: ${fulfillmentStatus}</p>
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+            <div style="background-color: #ffffff; padding: 20px; margin: 20px auto; max-width: 600px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+              <div style="text-align: center; padding: 20px 0;">
+                <img src="https://yourdomain.com/logo.png" alt="Logo" style="width: 100px;">
+              </div>
+              <div style="text-align: left;">
+                <h1>Order Update</h1>
+                <p>Your order has been updated with the following details:</p>
+                <ul>
+                  <li>Order Type: ${order.order_type}</li>
+                  ${totalCost ? `<li>Total Cost: $${totalCost}</li>` : ""}
+                  <li>Payment Status: ${paymentStatus}</li>
+                  <li>Fulfillment Status: ${fulfillmentStatus}</li>
+                </ul>
+              </div>
+              <div style="text-align: center; padding: 10px 0; font-size: 12px; color: #888;">
+                &copy; 2024 Sweet_Plus Cake House. All rights reserved.
+              </div>
+            </div>
+          </body>
+        </html>
       `;
 
       if (totalCost) {
         await transporter.sendMail({
-          to: user.email,
+          to: email,
           subject: "Order Update",
           html: emailMessage,
         });
@@ -403,7 +455,7 @@ app.put(
 
       if (fulfillmentStatus === "fulfilled") {
         await transporter.sendMail({
-          to: user.email,
+          to: email,
           subject: "Order Fulfilled",
           html: `<p>Your order has been fulfilled. ${emailMessage}</p>`,
         });
@@ -411,7 +463,7 @@ app.put(
 
       if (fulfillmentStatus === "Accepted") {
         await transporter.sendMail({
-          to: user.email,
+          to: email,
           subject: "Order Accepted",
           html: `<p>Your order has been accepted. ${emailMessage}</p>`,
         });
@@ -419,101 +471,187 @@ app.put(
 
       res.send({ message: "Order updated", order: updatedOrder.rows[0] });
     } catch (error) {
-      console.error("Error updating order:", error); // Add this line for detailed logging
+      console.error("Error updating order:", error);
       res.status(500).send({ error: "Internal server error" });
     }
   }
 );
 
 app.put(
-  "/admin/orders/:id/update-cost",
-  authenticateToken,
-  authenticateAdmin,
-  async (req, res) => {
-    const { totalCost } = req.body;
-    try {
-      const orderResult = await pool.query(
-        "SELECT * FROM orders WHERE id = $1",
-        [req.params.id]
-      );
-      const order = orderResult.rows[0];
-      if (!order) {
-        return res.status(404).send({ error: "Order not found" });
+    "/admin/orders/:id/update-cost",
+    authenticateToken,
+    authenticateAdmin,
+    async (req, res) => {
+      const { totalCost } = req.body;
+      try {
+        const orderResult = await pool.query(
+          "SELECT * FROM orders WHERE id = $1",
+          [req.params.id]
+        );
+        const order = orderResult.rows[0];
+        if (!order) {
+          return res.status(404).send({ error: "Order not found" });
+        }
+  
+        const userResult = await pool.query("SELECT * FROM users WHERE id = $1", [
+          order.user_id,
+        ]);
+        const user = userResult.rows[0];
+  
+        const guestEmail = order.guest_email;
+        const email = user ? user.email : guestEmail;
+        if (!email) {
+          return res.status(404).send({ error: "User or guest email not found" });
+        }
+  
+        const updatedOrder = await pool.query(
+          "UPDATE orders SET total_cost = $1 WHERE id = $2 RETURNING *",
+          [totalCost, req.params.id]
+        );
+  
+        // Email templates
+        const cakeEmailMessage = `
+          <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+              <div style="background-color: #ffffff; padding: 20px; margin: 20px auto; max-width: 600px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                <div style="text-align: center; padding: 20px 0;">
+                  <img src="https://sweetpluscake.com/gallery_gen/a39f21227f710ae5ffd4f53130776506_552x162_fit.jpg?ts=1714925658" alt="Logo" style="width: 100px;">
+                </div>
+                <div style="text-align: left;">
+                  <h1 style="color: #333;">Order Number #${order.order_number} Total Cost Update</h1>
+                  <p style="color: #333;">Your order total cost has been updated.</p>
+                  <ul style="list-style-type: none; padding: 0; color: black;">
+                    <li style="padding: 5px 0;"><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</li>
+                    <li style="padding: 5px 0;"><strong>Pickup Date:</strong> ${new Date(order.pickup_date).toLocaleDateString()}</li>
+                    <li style="padding: 5px 0;"><strong>Order Type:</strong> ${order.order_type}</li>
+                    <li style="padding: 5px 0;"><strong>Cake Size:</strong> ${order.cake_size}</li>
+                    <li style="padding: 5px 0;"><strong>Cake Flavor:</strong> ${order.cake_flavor}</li>
+                    <li style="padding: 5px 0;"><strong>Cake Filling:</strong> ${order.cake_filling}</li>
+                    <li style="padding: 5px 0;"><strong>Cake Decoration:</strong> ${order.cake_decoration}</li>
+                    <li style="padding: 5px 0;"><strong>Cake Design:</strong> ${order.cake_design}</li>
+                    <li style="padding: 5px 0;"><strong>Total Cost:</strong> $${totalCost}</li>
+                  </ul>
+                </div>
+                <div style="text-align: center; padding: 10px 0; font-size: 12px; color: #888;">
+                  &copy; 2024 Sweetplus Cakehouse. All rights reserved.
+                </div>
+              </div>
+            </body>
+          </html>
+        `;
+  
+        const cupcakeEmailMessage = `
+          <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+              <div style="background-color: #ffffff; padding: 20px; margin: 20px auto; max-width: 600px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                <div style="text-align: center; padding: 20px 0;">
+                  <img src="https://sweetpluscake.com/gallery_gen/a39f21227f710ae5ffd4f53130776506_552x162_fit.jpg?ts=1714925658" alt="Logo" style="width: 100px;">
+                </div>
+                <div style="text-align: left;">
+                  <h1 style="color: #333;">Order Number #${order.order_number} Total Cost Update</h1>
+                  <p style="color: #333;">Your order total cost has been updated.</p>
+                  <ul style="list-style-type: none; padding: 0; color: black;">
+                    <li style="padding: 5px 0;"><strong>Order Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</li>
+                    <li style="padding: 5px 0;"><strong>Pickup Date:</strong> ${new Date(order.pickup_date).toLocaleDateString()}</li>
+                    <li style="padding: 5px 0;"><strong>Order Type:</strong> ${order.order_type}</li>
+                    <li style="padding: 5px 0;"><strong>Cupcake Count:</strong> ${order.cupcake_count}</li>
+                    <li style="padding: 5px 0;"><strong>Frosting Flavor:</strong> ${order.frosting_flavor}</li>
+                    <li style="padding: 5px 0;"><strong>Fruit Toppings:</strong> ${order.fruit_toppings}</li>
+                    <li style="padding: 5px 0;"><strong>Flower Decoration:</strong> ${order.flower_decoration}</li>
+                    <li style="padding: 5px 0;"><strong>Cupcake Design:</strong> ${order.cupcake_design}</li>
+                    <li style="padding: 5px 0;"><strong>Total Cost:</strong> $${totalCost}</li>
+                  </ul>
+                </div>
+                <div style="text-align: center; padding: 10px 0; font-size: 12px; color: #888;">
+                  &copy; 2024 Sweetplus Cakehouse. All rights reserved.
+                </div>
+              </div>
+            </body>
+          </html>
+        `;
+  
+        // Assign the correct template based on order type
+        const emailMessage = order.order_type === "Cake" ? cakeEmailMessage : cupcakeEmailMessage;
+  
+        await transporter.sendMail({
+          to: email,
+          subject: "Order Total Cost Update",
+          html: emailMessage,
+        });
+  
+        res.send({
+          message: "Total cost updated and email sent",
+          order: updatedOrder.rows[0],
+        });
+      } catch (error) {
+        console.error("Error updating total cost:", error);
+        res.status(500).send({ error: "Internal server error" });
       }
-
-      const userResult = await pool.query("SELECT * FROM users WHERE id = $1", [
-        order.user_id,
-      ]);
-      const user = userResult.rows[0];
-      if (!user) {
-        return res.status(404).send({ error: "User not found" });
-      }
-
-      const updatedOrder = await pool.query(
-        "UPDATE orders SET total_cost = $1 WHERE id = $2 RETURNING *",
-        [totalCost, req.params.id]
-      );
-
-      const emailMessage = `
-        <p>Order Type: ${order.order_type}</p>
-        <p>Size/Quantity: ${order.size_or_quantity}</p>
-        <p>Total Cost: $${totalCost}</p>
-      `;
-
-      await transporter.sendMail({
-        to: user.email,
-        subject: "Order Total Cost Update",
-        html: emailMessage,
-      });
-
-      res.send({
-        message: "Total cost updated and email sent",
-        order: updatedOrder.rows[0],
-      });
-    } catch (error) {
-      console.error("Error updating total cost:", error);
-      res.status(500).send({ error: "Internal server error" });
     }
-  }
-);
+  );
+  
 
 // Register new user endpoint
 app.post("/register", async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
-
-  if (!firstName || !lastName || !email || !password) {
-    return res.status(400).send({ error: "All fields are required" });
-  }
-
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await pool.query(
-      "INSERT INTO users (first_name, last_name, email, password, is_email_confirmed) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [firstName, lastName, email, hashedPassword, false]
-    );
-
-    const user = result.rows[0];
-    const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
-    const confirmationLink = `http://localhost:3000/confirm-email?token=${token}`;
-
-    await transporter.sendMail({
-      to: email,
-      subject: "Email Confirmation",
-      html: `<p>Click <a href="${confirmationLink}">here</a> to confirm your email</p>`,
-    });
-
-    res
-      .status(201)
-      .send({
+    const { firstName, lastName, email, password } = req.body;
+  
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).send({ error: "All fields are required" });
+    }
+  
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const result = await pool.query(
+        "INSERT INTO users (first_name, last_name, email, password, is_email_confirmed) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+        [firstName, lastName, email, hashedPassword, false]
+      );
+  
+      const user = result.rows[0];
+      const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
+        expiresIn: "1h",
+      });
+      const confirmationLink = `http://localhost:3000/confirm-email?token=${token}`;
+  
+      // Styled email template
+      const emailMessage = `
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+            <div style="background-color: #ffffff; padding: 20px; margin: 20px auto; max-width: 600px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+              <div style="text-align: center; padding: 20px 0;">
+                <img src="https://sweetpluscake.com/gallery_gen/a39f21227f710ae5ffd4f53130776506_552x162_fit.jpg?ts=1714925658" alt="Logo" style="width: 100px;">
+              </div>
+              <div style="text-align: left;">
+                <h1 style="color: #333;">Confirm Your Email</h1>
+                <p style="color: #333;">Hello ${firstName} ${lastName},</p>
+                <p style="color: #333;">Thank you for registering. Please click the link below to confirm your email address:</p>
+                <p style="text-align: center;">
+                  <a href="${confirmationLink}" style="background-color: #007bff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Confirm Email</a>
+                </p>
+                <p style="color: #333;">If you did not create an account, please ignore this email.</p>
+              </div>
+              <div style="text-align: center; padding: 10px 0; font-size: 12px; color: #888;">
+                &copy; 2024 Sweet_Plus Cake House. All rights reserved.
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+  
+      await transporter.sendMail({
+        to: email,
+        subject: "Email Confirmation",
+        html: emailMessage,
+      });
+  
+      res.status(201).send({
         message: "User registered successfully. Please confirm your email.",
       });
-  } catch (error) {
-    console.error("Error registering user:", error);
-    res.status(500).send({ error: "Internal server error" });
-  }
-});
+    } catch (error) {
+      console.error("Error registering user:", error);
+      res.status(500).send({ error: "Internal server error" });
+    }
+  });
+  
 
 app.get("/confirm-email", async (req, res) => {
   const token = req.query.token;
@@ -544,39 +682,65 @@ app.get("/confirm-email", async (req, res) => {
 
 // Forgot password endpoint
 app.post("/forgot-password", async (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).send({ error: "Email is required" });
-  }
-
-  try {
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
-      email,
-    ]);
-    const user = result.rows[0];
-
-    if (!user) {
-      return res.status(400).send({ error: "User not found" });
+    const { email } = req.body;
+  
+    if (!email) {
+      return res.status(400).send({ error: "Email is required" });
     }
-
-    const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
-    const resetLink = `http://localhost:3000/reset-password/${token}`; // Ensure this matches your route
-
-    await transporter.sendMail({
-      to: email,
-      subject: "Password Reset",
-      html: `<p>Click <a href="${resetLink}">here</a> to reset your password</p>`,
-    });
-
-    res.send({ message: "Password reset email sent" });
-  } catch (error) {
-    console.error("Error handling forgot password:", error);
-    res.status(500).send({ error: "Internal server error" });
-  }
-});
+  
+    try {
+      const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+        email,
+      ]);
+      const user = result.rows[0];
+  
+      if (!user) {
+        return res.status(400).send({ error: "User not found" });
+      }
+  
+      const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
+        expiresIn: "1h",
+      });
+      const resetLink = `http://localhost:3000/reset-password/${token}`; // Ensure this matches your route
+  
+      // Styled email template
+      const emailMessage = `
+        <html>
+          <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+            <div style="background-color: #ffffff; padding: 20px; margin: 20px auto; max-width: 600px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+              <div style="text-align: center; padding: 20px 0;">
+                <img src="https://sweetpluscake.com/gallery_gen/a39f21227f710ae5ffd4f53130776506_552x162_fit.jpg?ts=1714925658" alt="Logo" style="width: 100px;">
+              </div>
+              <div style="text-align: left;">
+                <h1 style="color: #333;">Password Reset Request</h1>
+                <p style="color: #333;">Hello,</p>
+                <p style="color: #333;">We received a request to reset your password. Please click the link below to reset your password:</p>
+                <p style="text-align: center;">
+                  <a href="${resetLink}" style="background-color: #d0021b; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a>
+                </p>
+                <p style="color: #333;">If you did not request a password reset, please ignore this email.</p>
+              </div>
+              <div style="text-align: center; padding: 10px 0; font-size: 12px; color: #888;">
+                &copy; 2024 Sweetplus Cakehouse. All rights reserved.
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+  
+      await transporter.sendMail({
+        to: email,
+        subject: "Password Reset",
+        html: emailMessage,
+      });
+  
+      res.send({ message: "Password reset email sent" });
+    } catch (error) {
+      console.error("Error handling forgot password:", error);
+      res.status(500).send({ error: "Internal server error" });
+    }
+  });
+  
 
 app.post("/reset-password", async (req, res) => {
   const { token, password } = req.body;
@@ -698,40 +862,43 @@ const sendVerificationEmail = async (email) => {
 };
 
 app.post("/resend-verification", async (req, res) => {
-    const { email } = req.body;
-  
-    if (!email) {
-      return res.status(400).send({ error: "Email is required" });
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).send({ error: "Email is required" });
+  }
+
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
     }
-  
-    try {
-      const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-      const user = result.rows[0];
-  
-      if (!user) {
-        return res.status(404).send({ error: "User not found" });
-      }
-  
-      if (user.is_email_confirmed) {
-        return res.status(400).send({ error: "Email is already confirmed" });
-      }
-  
-      const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: "1h" });
-      const confirmationLink = `http://localhost:3000/confirm-email?token=${token}`;
-  
-      await transporter.sendMail({
-        to: email,
-        subject: "Email Confirmation",
-        html: `<p>Click <a href="${confirmationLink}">here</a> to confirm your email</p>`,
-      });
-  
-      res.status(200).send({ message: "Verification email resent successfully" });
-    } catch (error) {
-      console.error("Error resending verification email:", error);
-      res.status(500).send({ error: "Internal server error" });
+
+    if (user.is_email_confirmed) {
+      return res.status(400).send({ error: "Email is already confirmed" });
     }
-  });
-  
+
+    const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
+    const confirmationLink = `http://localhost:3000/confirm-email?token=${token}`;
+
+    await transporter.sendMail({
+      to: email,
+      subject: "Email Confirmation",
+      html: `<p>Click <a href="${confirmationLink}">here</a> to confirm your email</p>`,
+    });
+
+    res.status(200).send({ message: "Verification email resent successfully" });
+  } catch (error) {
+    console.error("Error resending verification email:", error);
+    res.status(500).send({ error: "Internal server error" });
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

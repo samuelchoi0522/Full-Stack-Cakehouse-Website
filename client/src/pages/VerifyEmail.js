@@ -25,7 +25,7 @@ const VerifyEmail = () => {
     <div className="verify-email-container">
       <div className="verify-email-content">
         <img src={require('../photos/GreenCheckmarkOrderSubmitted.png')} alt="Email Sent" className="checkmark" />
-        <h2>We've sent a verification email to:</h2>
+        <h2 className="verifyheader">We've sent a verification email to:</h2>
         <p>{email}</p>
         <p>
           Click the link in your email to verify your account. If you can’t find the email, check your spam folder or{' '}

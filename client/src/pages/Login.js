@@ -47,7 +47,7 @@ const Login = () => {
           </form>
         </div>
         <div className="new-customer">
-          <h3>New Customer?</h3>
+          <h3>New Here?</h3>
           <a href="/signup" className="create-account-btn">Create Account</a>
         </div>
       </div>

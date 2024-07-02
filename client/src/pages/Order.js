@@ -7,7 +7,6 @@ import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
 import { LoadScript, Autocomplete } from "@react-google-maps/api";
 
-
 const libraries = ["places"];
 const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
@@ -29,13 +28,20 @@ const Order = () => {
   const [pickupOption, setPickupOption] = useState("");
   const [dietaryRestrictions, setDietaryRestrictions] = useState("");
   const [photo, setPhoto] = useState(null);
-  const [agreedToPolicies, setAgreedToPolicies] = useState(false);
   const [blockedDates, setBlockedDates] = useState([]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [delivery_address, setDeliveryAddress] = useState("");  // Add state for delivery address
+  const [guestInfoSubmitted, setGuestInfoSubmitted] = useState(false);
+
+  const [guestInfo, setGuestInfo] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
+  const [isGuest, setIsGuest] = useState(false);
+  const [delivery_address, setDeliveryAddress] = useState(""); // Add state for delivery address
   const autocompleteRef = useRef(null);
-  const navigate = useNavigate();  // Initialize useNavigate
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const fetchBlockedDates = async () => {
@@ -50,77 +56,185 @@ const Order = () => {
     fetchBlockedDates();
   }, []);
 
+  useEffect(() => {
+    if (blockedDates.length > 0) {
+      const firstValidDate = getFirstValidDate();
+      setPickupDate(firstValidDate);
+    }
+  }, [blockedDates]);
+
   const handlePlaceChanged = () => {
     const place = autocompleteRef.current.getPlace();
     if (place) {
-      setDeliveryAddress(place.formatted_address);
+      setDeliveryAddress(place.formatted_address || place.name || "");
     }
   };
 
-// Inside your Order.js
-const handleOrderSubmit = async (e) => {
+  // Inside your Order.js
+  const handleOrderSubmit = async (e) => {
     e.preventDefault();
-  
-    if (!isAuthenticated) {
-      setError("Please log in to place an order.");
+
+    if (!isGuest && !isAuthenticated && !guestInfoSubmitted) {
+      setError("Please log in or continue as a guest to place an order.");
       return;
     }
-  
+
     if (!orderType || !pickupDate || !photo) {
       setError("All fields are required.");
       return;
     }
-  
+
+    if (
+      isGuest &&
+      (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email)
+    ) {
+      setError("All guest fields are required.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("orderType", orderType);
     formData.append("cupcakeCount", cupcakeCount);
     formData.append("cupcakeFlavor", cupcakeFlavor);
     formData.append("frostingFlavor", frostingFlavor);
-    formData.append("fruitToppings", JSON.stringify(fruitToppings)); // Convert array to JSON string
+    formData.append("fruitToppings", JSON.stringify(fruitToppings));
     formData.append("flowerDecoration", flowerDecoration);
     formData.append("cupcakeDesign", cupcakeDesign);
     formData.append("cakeSize", cakeSize);
     formData.append("cakeFlavor", cakeFlavor);
     formData.append("cakeFilling", cakeFilling);
-    formData.append("cakeDecoration", JSON.stringify(cakeDecoration)); // Convert array to JSON string
+    formData.append("cakeDecoration", JSON.stringify(cakeDecoration));
     formData.append("cakeDesign", cakeDesign);
     formData.append("pickupDate", pickupDate.toISOString());
     formData.append("pickupOption", pickupOption);
     formData.append("dietaryRestrictions", dietaryRestrictions);
     formData.append("photo", photo);
-    formData.append("delivery_address", delivery_address); // Ensure correct column name
-  
+    formData.append("delivery_address", delivery_address);
+
+    if (isGuest) {
+      formData.append("guestFirstName", guestInfo.firstName);
+      formData.append("guestLastName", guestInfo.lastName);
+      formData.append("guestEmail", guestInfo.email);
+    }
+
     try {
-      const token = localStorage.getItem("token");
+      const headers = {
+        "Content-Type": "multipart/form-data",
+      };
+
+      if (!isGuest && isAuthenticated) {
+        const token = localStorage.getItem("token");
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      console.log("Headers being sent: ", headers);
+
       const response = await axios.post(
         "http://localhost:3001/order",
         formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        { headers }
       );
       setMessage("Order placed successfully");
-      navigate("/order-success");  // Redirect to success page
+      navigate("/order-success");
     } catch (err) {
       console.error("Error placing order:", err);
       setError("Error placing order");
     }
   };
-  
 
   const isBlockedDate = (date) => {
     const today = new Date();
     const twoDaysFromToday = new Date(today);
     twoDaysFromToday.setDate(today.getDate() + 2);
-    
-    return date < today || date <= twoDaysFromToday || blockedDates.some(
-      (blockedDate) =>
-        new Date(blockedDate).toDateString() === date.toDateString()
+
+    return (
+      date < today ||
+      date <= twoDaysFromToday ||
+      blockedDates.some(
+        (blockedDate) =>
+          new Date(blockedDate).toDateString() === date.toDateString()
+      )
     );
   };
+
+  const getFirstValidDate = () => {
+    const today = new Date();
+    let firstValidDate = new Date(today);
+    firstValidDate.setDate(today.getDate() + 3); // Start checking from the day after the auto-blocked period
+
+    while (isBlockedDate(firstValidDate)) {
+      firstValidDate.setDate(firstValidDate.getDate() + 1);
+    }
+
+    return firstValidDate;
+  };
+
+  if (!isAuthenticated && !isGuest) {
+    return (
+      <div className="order-container">
+        <h1>Place Your Order</h1>
+        <p>Please sign in to order or continue as a guest</p>
+        <button onClick={() => navigate("/login")}>Sign In</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button onClick={() => setIsGuest(true)}>Continue as Guest</button>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && isGuest && !guestInfoSubmitted) {
+    return (
+      <div className="order-container">
+        <h1>Guest Order Information</h1>
+        {error && <p className="error">{error}</p>}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (guestInfo.firstName && guestInfo.lastName && guestInfo.email) {
+              setError(""); // Clear any previous errors
+              setGuestInfoSubmitted(true); // Mark guest info as submitted
+            } else {
+              setError("All fields are required.");
+            }
+          }}
+        >
+          <label>
+            First Name:
+            <input
+              type="text"
+              value={guestInfo.firstName}
+              onChange={(e) =>
+                setGuestInfo({ ...guestInfo, firstName: e.target.value })
+              }
+              required
+            />
+          </label>
+          <label>
+            Last Name:
+            <input
+              type="text"
+              value={guestInfo.lastName}
+              onChange={(e) =>
+                setGuestInfo({ ...guestInfo, lastName: e.target.value })
+              }
+              required
+            />
+          </label>
+          <label>
+            Email:
+            <input
+              type="email"
+              value={guestInfo.email}
+              onChange={(e) =>
+                setGuestInfo({ ...guestInfo, email: e.target.value })
+              }
+              required
+            />
+          </label>
+          <button type="submit">Continue to Order</button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="order-container">
@@ -428,7 +542,7 @@ const handleOrderSubmit = async (e) => {
           <>
             <label>Date Needed:</label>
             <DatePicker
-              selected={pickupDate}
+              selected={getFirstValidDate()}
               onChange={(date) => setPickupDate(date)}
               filterDate={(date) => !isBlockedDate(date)}
             />
@@ -448,10 +562,14 @@ const handleOrderSubmit = async (e) => {
             </select>
 
             {pickupOption === "Delivery" && (
-                <LoadScript googleMapsApiKey={GOOGLE_API_KEY} libraries={libraries}>
-
+              <LoadScript
+                googleMapsApiKey={GOOGLE_API_KEY}
+                libraries={libraries}
+              >
                 <Autocomplete
-                  onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+                  onLoad={(autocomplete) =>
+                    (autocompleteRef.current = autocomplete)
+                  }
                   onPlaceChanged={handlePlaceChanged}
                 >
                   <input
@@ -480,9 +598,63 @@ const handleOrderSubmit = async (e) => {
                 required
               />
             </div>
+
+            <div className="important-info">
+              <h2>Important Information: Cake Flavor and Texture Policies</h2>
+              <ol>
+                <li>
+                  <strong>Acceptance of Cake:</strong>
+                  <p>
+                    By accepting and picking up your cake from Sweetplus
+                    Cakehouse, you acknowledge that:
+                  </p>
+                  <ul>
+                    <li>
+                      Cake flavor and texture are subjective and may vary from
+                      individual preferences.
+                    </li>
+                    <li>
+                      Once the cake has been accepted and picked up, full
+                      refunds requested solely based on personal preferences
+                      regarding flavor or texture will not be honored.
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>
+                    Quality Determination, Store Credit, and Refund Limitations:
+                  </strong>
+                  <p>
+                    If you believe the cake does not meet our quality standards,
+                    you may qualify for a percentage of a store credit. To be
+                    eligible, the cake must be reported/returned to us within a
+                    timely manner, preferably within 24 hours of pick up.
+                    Quality determination is solely at the discretion of
+                    [Sweet_Plus Cake House]. Please understand that we cannot
+                    issue refunds for cakes that have already been completely
+                    consumed or destroyed.
+                  </p>
+                </li>
+                <li>
+                  <strong>Store Credit Calculation:</strong>
+                  <p>
+                    Store credit percentages will be based on the promptness of
+                    the cake return, the amount consumed, and our determination
+                    of the overall quality. Customers who fail to contact us
+                    within 24 hours of cake pick-up will not be eligible for any
+                    store credits.
+                  </p>
+                </li>
+              </ol>
+              <p>
+                By clicking "Submit Order" you agree to our Policies and Terms
+                and Conditions.
+              </p>
+            </div>
           </>
         )}
 
+        <br></br>
         <button type="submit">Submit Order</button>
       </form>
     </div>

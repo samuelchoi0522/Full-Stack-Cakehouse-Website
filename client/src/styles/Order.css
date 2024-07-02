@@ -8,6 +8,34 @@
   text-align: center;
 }
 
+.important-info {
+    text-align: left;
+    margin-top: 20px;
+  }
+  
+  .important-info h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .important-info ol {
+    padding-left: 20px;
+  }
+  
+  .important-info li {
+    margin-bottom: 10px;
+  }
+  
+  .important-info p {
+    margin: 5px 0;
+  }
+  
+  .important-info ul {
+    list-style-type: disc;
+    padding-left: 20px;
+  }
+  
+
 .order-container h1 {
   font-size: 24px;
   margin-bottom: 20px;
@@ -20,14 +48,15 @@
     width: 96%;
   }
 
-.order-container input,
-.order-container select {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
+  .order-container input,
+  .order-container select {
+    width: calc(100% - 20px); /* Adjusted width to fit within the container */
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Ensures padding and border are included in the element's total width */
+  }
 
 .order-container button {
   padding: 10px 20px;

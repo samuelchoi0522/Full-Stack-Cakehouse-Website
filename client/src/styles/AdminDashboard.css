@@ -1,36 +1,170 @@
 .admin-dashboard {
-    padding: 20px;
-  }
-  
-  .admin-dashboard table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .admin-dashboard th, .admin-dashboard td {
-    border: 1px solid #ddd;
-    padding: 8px;
-  }
-  
-  .admin-dashboard th {
-    background-color: #f2f2f2;
-  }
-  
-  .order-photo {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-  }
-  
-  /* AdminDashboard.css */
+  padding: 20px;
+}
+
+.admin-dashboard table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.admin-dashboard th,
+.admin-dashboard td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.admin-dashboard th {
+  background-color: #f2f2f2;
+}
+
+.order-photo {
+  width: 200px;
+  height: auto;
+  object-fit: cover;
+}
 
 .available-date {
-    background-color: green !important;
-    color: white;
+  background-color: green !important;
+  color: white;
+}
+
+.unavailable-date {
+  background-color: red !important;
+  color: white;
+}
+
+.blockdate{
+    background-color: rgba(255, 0, 0, 0.819);
+}
+.blockdate:hover{
+    background-color: rgb(255, 0, 0);
+}
+
+h2 {
+  background-color: #f2f2f2;
+  padding: 10px;
+  margin-top: 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* Order item styles */
+.order-item {
+  background-color: #fff;
+  padding: 20px;
+  margin: 0 auto 20px auto; /* Center align with equal margins */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.237);
+  box-sizing: border-box; /* Ensure padding and border are included in the element's total width */
+  word-wrap: break-word;
+  list-style: none; /* Add this line to remove bullet points */
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
-  .unavailable-date {
-    background-color: red !important;
-    color: white;
+  .logoutbutton {
+    margin-left: auto; /* This will push the button to the right */
   }
   
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.order-header div {
+  width: 48%;
+}
+
+.order-details p {
+  margin: 5px 0;
+}
+
+.order-footer {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: flex-end;
+  margin-top: 0px;
+}
+
+.order-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px; /* Add some spacing between the photo and buttons */
+}
+
+.order-actions button {
+  margin-left: 10px; /* Add spacing between the buttons */
+}
+
+.order-footer button {
+  margin-left: 10px;
+}
+
+/* Responsive styles for mobile devices */
+@media (max-width: 768px) {
+  .admin-dashboard table,
+  .admin-dashboard thead,
+  .admin-dashboard tbody,
+  .admin-dashboard th,
+  .admin-dashboard td,
+  .admin-dashboard tr {
+    display: block;
+  }
+
+  .admin-dashboard thead tr {
+    display: none;
+  }
+
+  .admin-dashboard td {
+    border: none;
+    position: relative;
+    padding-left: 50%;
+    text-align: right;
+  }
+
+  .admin-dashboard td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    width: 45%;
+    padding-left: 15px;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  .admin-dashboard td img {
+    display: block;
+    margin: 0 auto;
+  }
+
+  .order-header {
+    flex-direction: column; /* Stack order header sections vertically */
+  }
+
+  .order-header div {
+    width: 100%; /* Ensure each section takes full width */
+    margin-bottom: 10px;
+  }
+}

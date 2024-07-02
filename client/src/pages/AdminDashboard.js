@@ -16,6 +16,9 @@ const AdminDashboard = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [newTotalCost, setNewTotalCost] = useState({});
   const [editingOrderId, setEditingOrderId] = useState(null);
+  const [pendingCollapsed, setPendingCollapsed] = useState(false);
+  const [acceptedCollapsed, setAcceptedCollapsed] = useState(false);
+  const [finishedCollapsed, setFinishedCollapsed] = useState(false);
   const navigate = useNavigate();
 
   const fetchOrders = async () => {
@@ -225,7 +228,18 @@ const AdminDashboard = () => {
     );
   };
 
+  const isAutoBlockedDate = (date) => {
+    const today = new Date();
+    const twoDaysAfterToday = new Date();
+    twoDaysAfterToday.setDate(today.getDate() + 2);
+
+    return date <= twoDaysAfterToday;
+  };
+
   const dayClassName = (date) => {
+    if (isAutoBlockedDate(date)) {
+      return "unavailable-date";
+    }
     return isBlockedDate(date) ? "unavailable-date" : "available-date";
   };
 
@@ -259,11 +273,30 @@ const AdminDashboard = () => {
     return <p>{error}</p>;
   }
 
+  const pendingOrders = orders.filter(
+    (order) =>
+      order.fulfillment_status !== "Accepted" &&
+      order.fulfillment_status !== "fulfilled"
+  );
+
+  const acceptedOrders = orders.filter(
+    (order) => order.fulfillment_status === "Accepted"
+  );
+
+  const finishedOrders = orders.filter(
+    (order) => order.fulfillment_status === "fulfilled"
+  );
+
   return (
     <div className="admin-dashboard">
-      <h1>Admin Dashboard</h1>
+      <h1 className="dashboard-header">
+        Admin Dashboard
+        <button className="logoutbutton" onClick={handleLogout}>
+          Logout
+        </button>
+      </h1>
+
       {message && <p>{message}</p>}
-      <button onClick={handleLogout}>Logout</button>
       <form onSubmit={handleBlockDateSubmit}>
         <DatePicker
           selected={selectedDate}
@@ -272,188 +305,228 @@ const AdminDashboard = () => {
           dayClassName={dayClassName}
           inline
         />
-        <button type="submit">Block Date</button>
+        <br></br>
+        <br></br>
+        <button type="submit" className="blockdate">Block Date</button>
       </form>
       <form onSubmit={handleUnblockDateSubmit}>
+      <br></br>
         <button type="submit">Unblock Date</button>
       </form>
-      <table>
-        <thead>
-          <tr>
-            <th>Order Number</th>
-            <th>Date</th>
-            <th>Customer</th>
-            <th>Email</th>
-            <th>Payment</th>
-            <th>Total</th>
-            <th>Order Type</th>
-            <th>Details</th>
-            <th>Photo</th>
-            <th>Fulfillment</th>
-            <th>Accept Order</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr key={order.id}>
-              <td>{order.order_number}</td>
-              <td>{new Date(order.created_at).toLocaleString()}</td>
-              <td>{`${order.first_name || ""} ${order.last_name || ""}`}</td>
-              <td>{order.email || ""}</td>
-              <td>
-                {order.fulfillment_status === "Accepted" ? (
-                  <select
-                    value={order.payment_status || "unpaid"}
-                    onChange={(e) =>
-                      handleUpdateOrder(order.id, {
-                        paymentStatus: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="unpaid">Unpaid</option>
-                    <option value="downpayment">Downpayment</option>
-                    <option value="paid">Paid</option>
-                  </select>
-                ) : (
-                  order.payment_status || "unpaid"
-                )}
-              </td>
-              <td>
-                {order.total_cost !== null && order.total_cost !== undefined ? (
-                  <>
-                    {order.total_cost}
-                    {editingOrderId === order.id ? (
-                      <>
-                        <input
-                          type="number"
-                          value={newTotalCost[order.id] ?? ""}
-                          onChange={(e) =>
-                            handleTotalCostChange(order.id, e.target.value)
-                          }
-                        />
-                        <button onClick={() => handleSubmitPrice(order.id)}>
-                          Submit Price
-                        </button>
-                      </>
-                    ) : (
-                      <button onClick={() => handleChangePrice(order.id)}>
-                        Change Price
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <input
-                      type="number"
-                      value={newTotalCost[order.id] ?? ""}
-                      onChange={(e) =>
-                        handleTotalCostChange(order.id, e.target.value)
-                      }
-                    />
-                    <button onClick={() => handleSubmitPrice(order.id)}>
-                      Submit Price
-                    </button>
-                  </>
-                )}
-              </td>
-              <td>{order.order_type}</td>
-              <td>
-                {order.order_type === "Cupcake" ? (
-                  <>
-                    <p>
-                      <strong>Cupcake Count:</strong> {order.cupcake_count}
-                    </p>
-                    <p>
-                      <strong>Cupcake Flavor:</strong> {order.cupcake_flavor}
-                    </p>
-                    <p>
-                      <strong>Frosting Flavor:</strong> {order.frosting_flavor}
-                    </p>
-                    <p>
-                      <strong>Fruit Toppings:</strong> {order.fruit_toppings}
-                    </p>
-                    <p>
-                      <strong>Flower Decoration:</strong>{" "}
-                      {order.flower_decoration}
-                    </p>
-                    <p>
-                      <strong>Cupcake Design:</strong> {order.cupcake_design}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p>
-                      <strong>Cake Size:</strong> {order.cake_size}
-                    </p>
-                    <p>
-                      <strong>Cake Flavor:</strong> {order.cake_flavor}
-                    </p>
-                    <p>
-                      <strong>Cake Filling:</strong> {order.cake_filling}
-                    </p>
-                    <p>
-                      <strong>Cake Decoration:</strong> {order.cake_decoration}
-                    </p>
-                    <p>
-                      <strong>Cake Design:</strong> {order.cake_design}
-                    </p>
-                  </>
-                )}
-                <p>
-                  <strong>Pickup Date:</strong>{" "}
-                  {new Date(order.pickup_date).toLocaleDateString()}
-                </p>
-                <p>
-                  <strong>Pickup Option:</strong> {order.pickup_option}
-                </p>
-                <p>
-                  <strong>Delivery Address:</strong>{" "}
-                  {order.delivery_address}
-                </p>
-                <p>
-                  <strong>Dietary Restrictions:</strong>{" "}
-                  {order.dietary_restrictions}
-                </p>
-              </td>
-              <td>
-                <img
-                  src={`http://localhost:3001/${order.photo_path}`}
-                  alt="Order"
-                  style={{ width: "100px" }}
-                />
-              </td>
-              <td>
-                {order.fulfillment_status === "Accepted" ? (
-                  <select
-                    value={order.fulfillment_status || "unfulfilled"}
-                    onChange={(e) =>
-                      handleUpdateOrder(order.id, {
-                        fulfillmentStatus: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="unfulfilled">Unfulfilled</option>
-                    <option value="fulfilled">Fulfilled</option>
-                  </select>
-                ) : (
-                  order.fulfillment_status || "unfulfilled"
-                )}
-              </td>
-              <td>
-                {order.fulfillment_status === "Accepted" ? (
-                  "Order Accepted"
-                ) : (
-                  <button onClick={() => handleAcceptOrder(order.id)}>
-                    Accept Order
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+      <h2 onClick={() => setPendingCollapsed(!pendingCollapsed)}>
+        Orders for Review {pendingCollapsed ? "▼" : "▲"}
+      </h2>
+      {!pendingCollapsed && (
+        <OrderList
+          orders={pendingOrders}
+          handleAcceptOrder={handleAcceptOrder}
+          handleUpdateOrder={handleUpdateOrder}
+          handleChangePrice={handleChangePrice}
+          handleSubmitPrice={handleSubmitPrice}
+          editingOrderId={editingOrderId}
+          newTotalCost={newTotalCost}
+          handleTotalCostChange={handleTotalCostChange}
+        />
+      )}
+
+      <h2 onClick={() => setAcceptedCollapsed(!acceptedCollapsed)}>
+        Processing Orders {acceptedCollapsed ? "▼" : "▲"}
+      </h2>
+      {!acceptedCollapsed && (
+        <OrderList
+          orders={acceptedOrders}
+          handleAcceptOrder={handleAcceptOrder}
+          handleUpdateOrder={handleUpdateOrder}
+          handleChangePrice={handleChangePrice}
+          handleSubmitPrice={handleSubmitPrice}
+          editingOrderId={editingOrderId}
+          newTotalCost={newTotalCost}
+          handleTotalCostChange={handleTotalCostChange}
+        />
+      )}
+
+      <h2 onClick={() => setFinishedCollapsed(!finishedCollapsed)}>
+        Finished Orders {finishedCollapsed ? "▼" : "▲"}
+      </h2>
+      {!finishedCollapsed && (
+        <OrderList
+          orders={finishedOrders}
+          handleAcceptOrder={handleAcceptOrder}
+          handleUpdateOrder={handleUpdateOrder}
+          handleChangePrice={handleChangePrice}
+          handleSubmitPrice={handleSubmitPrice}
+          editingOrderId={editingOrderId}
+          newTotalCost={newTotalCost}
+          handleTotalCostChange={handleTotalCostChange}
+        />
+      )}
     </div>
   );
 };
+
+const OrderList = ({
+  orders,
+  handleAcceptOrder,
+  handleUpdateOrder,
+  handleChangePrice,
+  handleSubmitPrice,
+  editingOrderId,
+  newTotalCost,
+  handleTotalCostChange,
+}) => (
+  <ul>
+    {orders.map((order) => (
+      <li key={order.id} className="order-item">
+        <div className="order-header">
+          <div>
+            <p>
+              <strong>Customer Name: </strong>
+              {`${order.first_name || ""} ${order.last_name || ""}`}
+            </p>
+            <p>
+              <strong>Email: </strong>
+              {order.email || ""}
+            </p>
+            <p>
+              <strong>Order Placed:</strong>{" "}
+              {new Date(order.created_at).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Total:</strong>{" "}
+              {order.total_cost ? `$${order.total_cost}` : "Pending"}
+            </p>
+            <p>
+              <strong>Pickup Date:</strong>{" "}
+              {new Date(order.pickup_date).toLocaleDateString()}
+            </p>
+          </div>
+          <div>
+            <p>
+              <strong>Order Number:</strong> {order.order_number}
+            </p>
+            <p>
+              <strong>Pickup Option:</strong> {order.pickup_option}
+            </p>
+            {order.pickup_option === "Delivery" ? (
+              <p>
+                <strong>Delivery Address:</strong> {order.delivery_address}
+              </p>
+            ) : null}
+            <p>
+              <strong>Fulfillment Status:</strong>
+              <select
+                value={order.fulfillment_status || "unfulfilled"}
+                onChange={(e) =>
+                  handleUpdateOrder(order.id, {
+                    fulfillmentStatus: e.target.value,
+                  })
+                }
+              >
+                <option value="unfulfilled">Unfulfilled</option>
+                <option value="fulfilled">Fulfilled</option>
+              </select>
+            </p>
+            <p>
+              <strong>Payment Status:</strong>
+              <select
+                value={order.payment_status || "unpaid"}
+                onChange={(e) =>
+                  handleUpdateOrder(order.id, {
+                    paymentStatus: e.target.value,
+                  })
+                }
+              >
+                <option value="unpaid">Unpaid</option>
+                <option value="downpayment">Downpayment</option>
+                <option value="paid">Paid</option>
+              </select>
+            </p>
+          </div>
+        </div>
+        <div className="order-details">
+          <p>
+            <strong>Order Type:</strong> {order.order_type}
+          </p>
+          {order.order_type === "Cupcake" ? (
+            <>
+              <p>
+                <strong>Cupcake Count:</strong> {order.cupcake_count}
+              </p>
+              <p>
+                <strong>Cupcake Flavor:</strong> {order.cupcake_flavor}
+              </p>
+              <p>
+                <strong>Frosting Flavor:</strong> {order.frosting_flavor}
+              </p>
+              <p>
+                <strong>Fruit Toppings:</strong> {order.fruit_toppings}
+              </p>
+              <p>
+                <strong>Flower Decoration:</strong> {order.flower_decoration}
+              </p>
+              <p>
+                <strong>Cupcake Design:</strong> {order.cupcake_design}
+              </p>
+            </>
+          ) : (
+            <>
+              <p>
+                <strong>Cake Size:</strong> {order.cake_size}
+              </p>
+              <p>
+                <strong>Cake Flavor:</strong> {order.cake_flavor}
+              </p>
+              <p>
+                <strong>Cake Filling:</strong> {order.cake_filling}
+              </p>
+              <p>
+                <strong>Cake Decoration:</strong> {order.cake_decoration}
+              </p>
+              <p>
+                <strong>Cake Design:</strong> {order.cake_design}
+              </p>
+            </>
+          )}
+          <p>
+            <strong>Dietary Restrictions:</strong> {order.dietary_restrictions}
+          </p>
+        </div>
+        <div className="order-footer">
+          <img
+            src={`http://localhost:3001/${order.photo_path}`}
+            alt="Order"
+            className="order-photo"
+          />
+          <div className="order-actions">
+            {editingOrderId === order.id ? (
+              <>
+                <input
+                  type="number"
+                  value={newTotalCost[order.id] ?? ""}
+                  onChange={(e) =>
+                    handleTotalCostChange(order.id, e.target.value)
+                  }
+                />
+                <button onClick={() => handleSubmitPrice(order.id)}>
+                  Submit Price
+                </button>
+              </>
+            ) : (
+              <button onClick={() => handleChangePrice(order.id)}>
+                Change Price
+              </button>
+            )}
+            {order.fulfillment_status !== "Accepted" && (
+              <button onClick={() => handleAcceptOrder(order.id)}>
+                Accept Order
+              </button>
+            )}
+          </div>
+        </div>
+      </li>
+    ))}
+  </ul>
+);
 
 export default AdminDashboard;

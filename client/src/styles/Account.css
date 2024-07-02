@@ -1,15 +1,17 @@
 .accountinfo-container {
-    width: 99%;
+    width: 100%;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 0 auto 20px auto; /* Center align with equal margins */
     padding: 20px;
     background-color: #f9f9f9;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
   }
   
   .accountinfo-container h1,
   .accountinfo-container h2 {
+    background-color: #f9f9f9;
     text-align: center;
     margin-bottom: 20px;
   }
@@ -27,9 +29,11 @@
   .order-item {
     background-color: #fff;
     padding: 20px;
-    margin-bottom: 20px;
+    margin: 0 auto 20px auto; /* Center align with equal margins */
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.237);
+    box-sizing: border-box; /* Ensure padding and border are included in the element's total width */
+    word-wrap: break-word;
   }
   
   .order-header {
@@ -42,9 +46,32 @@
   
   .order-header div {
     width: 48%;
+    word-wrap: break-word;
   }
   
   .order-details p {
     margin: 5px 0;
+    word-wrap: break-word;
+  }
+  
+  @media (max-width: 768px) {
+    .accountinfo-container {
+      width: 100%;
+      max-width: 100%; /* Ensure it takes full width on smaller screens */
+      margin: 0 auto 20px; /* Center align with equal margins */
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  
+    .order-header {
+      flex-direction: column; /* Stack order header sections vertically */
+    }
+  
+    .order-header div {
+      width: 100%; /* Ensure each section takes full width */
+      margin-bottom: 10px;
+    }
   }
   
