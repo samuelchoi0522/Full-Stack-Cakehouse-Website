@@ -14,13 +14,18 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-const SECRET_KEY = "your_secret_key"; // You should store this in environment variables
+const SECRET_KEY = process.env.SECRET_KEY; // You should store this in environment variables
+const GMAIL_APP_EMAIL = process.env.GMAIL_APP_EMAIL;
+const GMAIL_APP_PASS = process.env.GMAIL_APP_PASS;
+
+console.log(`hi`, GMAIL_APP_EMAIL);
+console.log(`hi`, GMAIL_APP_PASS);
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
-    user: "sweetpluscake@gmail.com",
-    pass: "pfxs neqn lpzy hmon",
+    user: GMAIL_APP_EMAIL,
+    pass: GMAIL_APP_PASS,
   },
 });
 
