@@ -5,10 +5,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../styles/Order.css";
 import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
-import { LoadScript, Autocomplete } from "@react-google-maps/api";
+import { LoadScript, Autocomplete, GoogleMap } from "@react-google-maps/api";
 
 const libraries = ["places"];
 const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+console.log(GOOGLE_API_KEY);
 
 const Order = () => {
   const { isAuthenticated } = useAuth();
