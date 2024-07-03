@@ -17,7 +17,7 @@ fi
 
 # Sync the build files to your S3 bucket
 echo "Deploying the client to S3..."
-aws s3 sync build/ s3://sweetpluscakehouse --delete
+aws s3 sync build/ s3://sweetpluscakehouse.com --delete
 
 # Optional: Invalidate CloudFront cache (replace with your CloudFront distribution ID)
 echo "Invalidating CloudFront cache..."
@@ -26,7 +26,7 @@ aws cloudfront create-invalidation --distribution-id E3U0JTSOHLBCBE --paths "/*"
 # Navigate to the server directory and deploy using Elastic Beanstalk CLI
 echo "Deploying the server to Elastic Beanstalk..."
 cd ..
-eb init -p node.js your-eb-application-name --region us-west-2
+eb init -p node.js sweetpluscakehouse --region us-west-2
 eb deploy
 
 
