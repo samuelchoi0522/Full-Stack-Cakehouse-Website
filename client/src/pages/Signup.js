@@ -46,6 +46,7 @@ const Signup = () => {
     }
 
     try {
+      // eslint-disable-next-line no-unused-vars
       const response = await axios.post("http://localhost:3001/register", {
         firstName,
         lastName,

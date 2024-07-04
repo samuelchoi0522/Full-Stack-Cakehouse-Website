@@ -4,3 +4,5 @@ node_modules
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+Dot_AWS_Credentials
+Dot_AWS_Config

@@ -139,6 +139,7 @@ const AdminDashboard = () => {
   const handleAcceptOrder = async (orderId) => {
     try {
       const token = localStorage.getItem("adminToken");
+      // eslint-disable-next-line no-unused-vars
       const response = await axios.put(
         `http://localhost:3001/admin/orders/${orderId}`,
         { fulfillmentStatus: "Accepted" },
@@ -194,6 +195,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem("adminToken");
+      // eslint-disable-next-line no-unused-vars
       const response = await axios.put(
         `http://localhost:3001/admin/orders/${orderId}/update-cost`,
         { totalCost },

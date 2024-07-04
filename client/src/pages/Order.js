@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/Order.css";
 import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
-import { LoadScript, Autocomplete, GoogleMap } from "@react-google-maps/api";
+import { LoadScript, Autocomplete } from "@react-google-maps/api";
 
 const libraries = ["places"];
 const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
@@ -44,6 +44,33 @@ const Order = () => {
   const autocompleteRef = useRef(null);
   const navigate = useNavigate(); // Initialize useNavigate
 
+  const isBlockedDate = useCallback((date) => {
+    const today = new Date();
+    const twoDaysFromToday = new Date(today);
+    twoDaysFromToday.setDate(today.getDate() + 2);
+
+    return (
+      date < today ||
+      date <= twoDaysFromToday ||
+      blockedDates.some(
+        (blockedDate) =>
+          new Date(blockedDate).toDateString() === date.toDateString()
+      )
+    );
+  }, [blockedDates]);
+
+  const getFirstValidDate = useCallback(() => {
+    const today = new Date();
+    let firstValidDate = new Date(today);
+    firstValidDate.setDate(today.getDate() + 3);
+  
+    while (isBlockedDate(firstValidDate)) {
+      firstValidDate.setDate(firstValidDate.getDate() + 1);
+    }
+  
+    return firstValidDate;
+  }, [isBlockedDate]);
+
   useEffect(() => {
     const fetchBlockedDates = async () => {
       try {
@@ -62,7 +89,7 @@ const Order = () => {
       const firstValidDate = getFirstValidDate();
       setPickupDate(firstValidDate);
     }
-  }, [blockedDates]);
+  }, [blockedDates, getFirstValidDate]);
 
   const handlePlaceChanged = () => {
     const place = autocompleteRef.current.getPlace();
@@ -130,6 +157,7 @@ const Order = () => {
 
       console.log("Headers being sent: ", headers);
 
+      // eslint-disable-next-line no-unused-vars
       const response = await axios.post(
         "http://localhost:3001/order",
         formData,
@@ -141,33 +169,6 @@ const Order = () => {
       console.error("Error placing order:", err);
       setError("Error placing order");
     }
-  };
-
-  const isBlockedDate = (date) => {
-    const today = new Date();
-    const twoDaysFromToday = new Date(today);
-    twoDaysFromToday.setDate(today.getDate() + 2);
-
-    return (
-      date < today ||
-      date <= twoDaysFromToday ||
-      blockedDates.some(
-        (blockedDate) =>
-          new Date(blockedDate).toDateString() === date.toDateString()
-      )
-    );
-  };
-
-  const getFirstValidDate = () => {
-    const today = new Date();
-    let firstValidDate = new Date(today);
-    firstValidDate.setDate(today.getDate() + 3); // Start checking from the day after the auto-blocked period
-
-    while (isBlockedDate(firstValidDate)) {
-      firstValidDate.setDate(firstValidDate.getDate() + 1);
-    }
-
-    return firstValidDate;
   };
 
   if (!isAuthenticated && !isGuest) {
