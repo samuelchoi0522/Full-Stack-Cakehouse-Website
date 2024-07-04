@@ -3,6 +3,10 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+# build the project
+echo "Building the home..."
+npm install
+
 # Navigate to the client directory and build the project
 echo "Building the client..."
 cd client
@@ -31,3 +35,4 @@ eb deploy sweetpluscake-dev
 
 
 echo "Deployment completed successfully."
+
