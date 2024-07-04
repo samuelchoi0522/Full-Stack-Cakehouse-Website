@@ -27,7 +27,7 @@ aws cloudfront create-invalidation --distribution-id E3U0JTSOHLBCBE --paths "/*"
 echo "Deploying the server to Elastic Beanstalk..."
 cd ..
 eb init -p node.js sweetpluscakehouse --region us-west-2
-eb deploy
+eb deploy sweetpluscake-dev
 
 
 echo "Deployment completed successfully."
