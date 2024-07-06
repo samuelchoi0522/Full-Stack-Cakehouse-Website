@@ -90,6 +90,11 @@ const generateOrderNumber = async () => {
   return orderNumber;
 };
 
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+  });
+  
+
 app.post("/order", upload.single("photo"), async (req, res) => {
   const {
     orderType,
