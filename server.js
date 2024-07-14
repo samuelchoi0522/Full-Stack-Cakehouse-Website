@@ -618,7 +618,7 @@ app.post("/register", async (req, res) => {
       const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
         expiresIn: "1h",
       });
-      const confirmationLink = `http://localhost:3000/confirm-email?token=${token}`;
+      const confirmationLink = `http://sweetpluscake.com/confirm-email?token=${token}`;
   
       // Styled email template
       const emailMessage = `
@@ -709,7 +709,7 @@ app.post("/forgot-password", async (req, res) => {
       const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
         expiresIn: "1h",
       });
-      const resetLink = `http://localhost:3000/reset-password/${token}`; // Ensure this matches your route
+      const resetLink = `http://sweetpluscake.com/reset-password/${token}`; // Ensure this matches your route
   
       // Styled email template
       const emailMessage = `
@@ -893,7 +893,7 @@ app.post("/resend-verification", async (req, res) => {
     const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
       expiresIn: "1h",
     });
-    const confirmationLink = `http://localhost:3000/confirm-email?token=${token}`;
+    const confirmationLink = `http://sweetpluscake.com/confirm-email?token=${token}`;
 
     await transporter.sendMail({
       to: email,
@@ -908,7 +908,7 @@ app.post("/resend-verification", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
