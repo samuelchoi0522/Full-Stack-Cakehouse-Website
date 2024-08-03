@@ -1,7 +1,7 @@
 const express = require("express");
-const router = express.Router();
+const api = express.Router();
 
-module.exports = router;
+module.exports = api;
 
 api.get("/user", authenticateToken, async (req, res) => {
     try {
