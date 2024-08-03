@@ -46,7 +46,7 @@ const Signup = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3001/register", {
+      const response = await axios.post("http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/register", {
         firstName,
         lastName,
         email,

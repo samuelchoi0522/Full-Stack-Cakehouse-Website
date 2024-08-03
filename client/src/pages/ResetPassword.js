@@ -16,7 +16,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3001/reset-password', { token, password });
+      const response = await axios.post('http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/reset-password', { token, password });
       setMessage(response.data.message);
     } catch (error) {
       setMessage(error.response?.data?.error || 'Error resetting password');

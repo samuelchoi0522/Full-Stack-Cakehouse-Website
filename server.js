@@ -9,17 +9,17 @@ const path = require("path");
 const fs = require("fs");
 const pool = require("./db"); // Import the PostgreSQL connection pool
 const nodemailer = require("nodemailer");
-
+const apiRoutes = require("./apiRoutes");
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+
+app.use("/api", apiRoutes);
 
 const SECRET_KEY = process.env.SECRET_KEY; // You should store this in environment variables
 const GMAIL_APP_EMAIL = process.env.GMAIL_APP_EMAIL;
 const GMAIL_APP_PASS = process.env.GMAIL_APP_PASS;
 
-console.log(`hi`, GMAIL_APP_EMAIL);
-console.log(`hi`, GMAIL_APP_PASS);
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -89,6 +89,8 @@ const generateOrderNumber = async () => {
   }
   return orderNumber;
 };
+
+app.use('/api', apiRouter);
 
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
@@ -233,49 +235,7 @@ app.post("/order", upload.single("photo"), async (req, res) => {
 });
 
 // Fetch user information endpoint
-app.get("/user", authenticateToken, async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT first_name, last_name, email FROM users WHERE id = $1",
-      [req.user.id]
-    );
-    const user = result.rows[0];
-    if (!user) {
-      return res.status(404).send({ error: "User not found" });
-    }
-    res.send(user);
-  } catch (error) {
-    console.error("Error fetching user information:", error);
-    res.status(500).send({ error: "Internal server error" });
-  }
-});
 
-app.get("/orders", authenticateToken, async (req, res) => {
-  try {
-    const ordersResult = await pool.query(
-      "SELECT * FROM orders WHERE user_id = $1 AND fulfillment_status = $2 ORDER BY created_at DESC",
-      [req.user.id, "Accepted"]
-    );
-    res.send(ordersResult.rows);
-  } catch (error) {
-    console.error("Error fetching orders:", error);
-    res.status(500).send({ error: "Internal server error" });
-  }
-});
-
-// Fetch user orders endpoint (only accepted orders)
-app.get("/user/orders", authenticateToken, async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT id, order_details, order_type, size_or_quantity, photo_path FROM orders WHERE user_id = $1 AND status = $2",
-      [req.user.id, "Accepted"]
-    );
-    res.send(result.rows);
-  } catch (error) {
-    console.error("Error fetching user orders:", error);
-    res.status(500).send({ error: "Internal server error" });
-  }
-});
 
 app.post(
   "/admin/logout",
@@ -365,30 +325,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Fetch all orders (admin only)
-app.get(
-  "/admin/orders",
-  authenticateToken,
-  authenticateAdmin,
-  async (req, res) => {
-    try {
-      const result = await pool.query(`
-          SELECT orders.*, 
-          COALESCE(users.first_name, orders.guest_first_name) AS first_name, 
-          COALESCE(users.last_name, orders.guest_last_name) AS last_name, 
-          COALESCE(users.email, orders.guest_email) AS email
-          FROM orders 
-          LEFT JOIN users ON orders.user_id = users.id
-          ORDER BY created_at DESC
-        `);
 
-      res.send(result.rows);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      res.status(500).send({ error: "Internal server error" });
-    }
-  }
-);
 
 // Update order status, payment status, and total cost (admin only)
 app.put(
@@ -661,32 +598,7 @@ app.post("/register", async (req, res) => {
   });
   
 
-app.get("/confirm-email", async (req, res) => {
-  const token = req.query.token;
 
-  if (!token) {
-    return res.status(400).send({ error: "Invalid token" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const userId = decoded.userId;
-
-    const result = await pool.query(
-      "UPDATE users SET email_confirmed = $1 WHERE id = $2 RETURNING *",
-      [true, userId]
-    );
-
-    if (result.rowCount === 0) {
-      return res.status(400).send({ error: "User not found" });
-    }
-
-    res.send({ message: "Email confirmed, you may now log in" });
-  } catch (error) {
-    console.error("Error confirming email:", error);
-    res.status(500).send({ error: "Internal server error" });
-  }
-});
 
 // Forgot password endpoint
 app.post("/forgot-password", async (req, res) => {
@@ -775,17 +687,7 @@ app.post("/reset-password", async (req, res) => {
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Get blocked dates
-app.get("/blocked-dates", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT blocked_date FROM blocked_dates");
-    const blockedDates = result.rows.map((row) => row.blocked_date);
-    res.send(blockedDates);
-  } catch (error) {
-    console.error("Error fetching blocked dates:", error);
-    res.status(500).send({ error: "Internal server error" });
-  }
-});
+
 
 // Add a new blocked date
 app.post(
@@ -806,22 +708,7 @@ app.post(
   }
 );
 
-// Get blocked dates
-app.get(
-  "/admin/blocked-dates",
-  authenticateToken,
-  authenticateAdmin,
-  async (req, res) => {
-    try {
-      const result = await pool.query("SELECT blocked_date FROM blocked_dates");
-      const blockedDates = result.rows.map((row) => row.blocked_date);
-      res.send(blockedDates);
-    } catch (error) {
-      console.error("Error fetching blocked dates:", error);
-      res.status(500).send({ error: "Internal server error" });
-    }
-  }
-);
+
 
 // Add a new blocked date
 app.post(
@@ -908,7 +795,7 @@ app.post("/resend-verification", async (req, res) => {
   }
 });
 
-const PORT = 3001;
+const PORT = process.env.port || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

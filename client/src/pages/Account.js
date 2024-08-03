@@ -20,13 +20,13 @@ const Account = () => {
           return;
         }
 
-        const userResponse = await axios.get("http://localhost:3001/user", {
+        const userResponse = await axios.get("http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/user", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        const ordersResponse = await axios.get("http://localhost:3001/orders", {
+        const ordersResponse = await axios.get("http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/orders", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

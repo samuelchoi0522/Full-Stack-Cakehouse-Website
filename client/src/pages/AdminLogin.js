@@ -18,7 +18,7 @@ const AdminLogin = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/admin/login', { email, password });
+      const response = await axios.post('http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/admin/login', { email, password });
       loginAdmin(response.data.token);
     } catch (error) {
       setMessage('Invalid email or password');

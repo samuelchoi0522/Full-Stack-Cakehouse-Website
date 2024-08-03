@@ -30,7 +30,7 @@ const AdminDashboard = () => {
         return;
       }
 
-      const response = await axios.get("http://localhost:3001/admin/orders", {
+      const response = await axios.get("http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/admin/orders", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -47,7 +47,7 @@ const AdminDashboard = () => {
   const fetchBlockedDates = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const response = await axios.get("http://localhost:3001/blocked-dates", {
+      const response = await axios.get("http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/blocked-dates", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -78,7 +78,7 @@ const AdminDashboard = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:3001/blocked-dates",
+        "http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/blocked-dates",
         { date: selectedDate.toISOString().split("T")[0] }, // Convert to ISO string and remove time part
         {
           headers: {
@@ -106,7 +106,7 @@ const AdminDashboard = () => {
       console.log("Date to unblock:", dateToSend); // Debugging statement
 
       const response = await axios.delete(
-        `http://localhost:3001/blocked-dates/${dateToSend}`,
+        `http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/blocked-dates/${dateToSend}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -140,7 +140,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem("adminToken");
       const response = await axios.put(
-        `http://localhost:3001/admin/orders/${orderId}`,
+        `http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/admin/orders/${orderId}`,
         { fulfillmentStatus: "Accepted" },
         {
           headers: {
@@ -165,7 +165,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem("adminToken");
       const response = await axios.put(
-        `http://localhost:3001/admin/orders/${orderId}`,
+        `http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/admin/orders/${orderId}`,
         updatedFields,
         {
           headers: {
@@ -195,7 +195,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem("adminToken");
       const response = await axios.put(
-        `http://localhost:3001/admin/orders/${orderId}/update-cost`,
+        `http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/admin/orders/${orderId}/update-cost`,
         { totalCost },
         {
           headers: {
@@ -247,7 +247,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem("adminToken");
       await axios.post(
-        "http://localhost:3001/admin/logout",
+        "http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/admin/logout",
         {},
         {
           headers: {
@@ -494,7 +494,7 @@ const OrderList = ({
         </div>
         <div className="order-footer">
           <img
-            src={`http://localhost:3001/${order.photo_path}`}
+            src={`http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/${order.photo_path}`}
             alt="Order"
             className="order-photo"
           />

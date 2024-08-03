@@ -10,7 +10,7 @@ const VerifyEmail = () => {
 
   const handleResendEmail = async () => {
     try {
-      await axios.post('http://localhost:3001/resend-verification', { email });
+      await axios.post('http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/resend-verification', { email });
       alert('Verification email resent successfully');
     } catch (error) {
       alert('Error resending verification email');

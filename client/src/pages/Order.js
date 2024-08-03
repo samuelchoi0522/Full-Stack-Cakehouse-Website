@@ -47,7 +47,7 @@ const Order = () => {
   useEffect(() => {
     const fetchBlockedDates = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/blocked-dates");
+        const response = await axios.get("http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/blocked-dates");
         setBlockedDates(response.data);
       } catch (error) {
         console.error("Error fetching blocked dates:", error);
@@ -131,7 +131,7 @@ const Order = () => {
       console.log("Headers being sent: ", headers);
 
       const response = await axios.post(
-        "http://localhost:3001/order",
+        "http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/order",
         formData,
         { headers }
       );

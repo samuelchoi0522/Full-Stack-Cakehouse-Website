@@ -13,7 +13,7 @@ const ForgotPassword = () => {
     }
     try {
       const response = await axios.post(
-        "http://localhost:3001/forgot-password",
+        "http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/forgot-password",
         { email }
       );
       setMessage("Password reset email sent");

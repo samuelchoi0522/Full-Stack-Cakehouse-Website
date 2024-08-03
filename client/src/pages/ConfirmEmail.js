@@ -12,7 +12,7 @@ const ConfirmEmail = () => {
   useEffect(() => {
     const confirmEmail = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/confirm-email?token=${token}`);
+        const response = await axios.get(`http://sweetpluscake-dev.eba-md5dtzmg.us-west-2.elasticbeanstalk.com:8080/api/confirm-email?token=${token}`);
         setMessage(response.data.message);
       } catch (error) {
         setMessage(error.response?.data?.error || 'Error confirming email');
