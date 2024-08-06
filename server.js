@@ -90,7 +90,7 @@ const generateOrderNumber = async () => {
   return orderNumber;
 };
 
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.status(200).send('OK');
   });
   
@@ -233,7 +233,7 @@ app.post("/order", upload.single("photo"), async (req, res) => {
 });
 
 // Fetch user information endpoint
-app.get("/user", authenticateToken, async (req, res) => {
+app.get("/api/user", authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT first_name, last_name, email FROM users WHERE id = $1",
@@ -250,7 +250,7 @@ app.get("/user", authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/orders", authenticateToken, async (req, res) => {
+app.get("/api/orders", authenticateToken, async (req, res) => {
   try {
     const ordersResult = await pool.query(
       "SELECT * FROM orders WHERE user_id = $1 AND fulfillment_status = $2 ORDER BY created_at DESC",
@@ -264,7 +264,7 @@ app.get("/orders", authenticateToken, async (req, res) => {
 });
 
 // Fetch user orders endpoint (only accepted orders)
-app.get("/user/orders", authenticateToken, async (req, res) => {
+app.get("/api/user/orders", authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT id, order_details, order_type, size_or_quantity, photo_path FROM orders WHERE user_id = $1 AND status = $2",
@@ -367,7 +367,7 @@ app.post("/login", async (req, res) => {
 
 // Fetch all orders (admin only)
 app.get(
-  "/admin/orders",
+  "/api/admin/orders",
   authenticateToken,
   authenticateAdmin,
   async (req, res) => {
@@ -661,7 +661,7 @@ app.post("/register", async (req, res) => {
   });
   
 
-app.get("/confirm-email", async (req, res) => {
+app.get("/api/confirm-email", async (req, res) => {
   const token = req.query.token;
 
   if (!token) {
@@ -776,7 +776,7 @@ app.post("/reset-password", async (req, res) => {
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Get blocked dates
-app.get("/blocked-dates", async (req, res) => {
+app.get("/api/blocked-dates", async (req, res) => {
   try {
     const result = await pool.query("SELECT blocked_date FROM blocked_dates");
     const blockedDates = result.rows.map((row) => row.blocked_date);
@@ -808,7 +808,7 @@ app.post(
 
 // Get blocked dates
 app.get(
-  "/admin/blocked-dates",
+  "/api/admin/blocked-dates",
   authenticateToken,
   authenticateAdmin,
   async (req, res) => {
